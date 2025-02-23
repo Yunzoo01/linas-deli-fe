@@ -27,17 +27,17 @@ const Footer = () => {
           </div>
 
           {/* Contact 제목 */}
-          <h2 className="text-[#A7A7A7] sm:text-white text-base font-medium sm:text-3xl">Contact us</h2>
+          <h2 className="text-[#A7A7A7] text-md sm:text-white text-base font-medium sm:text-3xl">Contact us</h2>
 
           {/* 이메일 */}
           <div className="flex items-center space-x-2 sm:space-x-6">
-            <img src="/Icon/Mail outline.svg" alt="Mail Icon" className="w-5 h-5 sm:w-7 sm:h-7 sm:filter sm:invert sm:brightness-0 sm:contrast-100" />
-            <p className="text-[#A7A7A7] sm:text-white text-sm font-normal sm:text-xl">linasdeli@gmail.com</p>
+            <img src="/Icon/Mail outline.svg" alt="Mail Icon" className="w-4 h-4 sm:w-7 sm:h-7 sm:filter sm:invert sm:brightness-0 sm:contrast-100" />
+            <p className="text-[#A7A7A7] text-sm sm:text-white text-sm font-normal sm:text-xl">linasdeli@gmail.com</p>
           </div>
 
           {/* 전화번호 */}
           <div className="flex items-center space-x-2 sm:space-x-6">
-            <img src="/Icon/Icon_call.svg" alt="Call Icon" className="w-5 h-5 sm:w-7 sm:h-7 sm:filter sm:invert sm:brightness-0 sm:contrast-100" />
+            <img src="/Icon/Icon_call.svg" alt="Call Icon" className="w-4 h-4 sm:w-7 sm:h-7 sm:filter sm:invert sm:brightness-0 sm:contrast-100" />
             <p className="text-[#A7A7A7] sm:text-white text-sm font-normal sm:text-xl">123-456-2355</p>
           </div>
         </div>
@@ -45,7 +45,7 @@ const Footer = () => {
 
       {/* 하단 구분선 */}
       <hr className="hidden sm:block border-t-2 border-white w-full mt-16" />
-      <div className="sm:flex justify-between sm:px-28 text-white text-2xl pt-6">
+      <div className="hidden sm:block sm:flex justify-between sm:px-28 text-white text-2xl pt-6">
         <p>Lina's Deli</p>
         <div>
           <a href="https://www.instagram.com/linasdeli/"
