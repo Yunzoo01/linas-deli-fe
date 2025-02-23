@@ -12,5 +12,21 @@
   --color-avocado-600: oklch(0.53 0.12 118.34);
   --ease-fluid: cubic-bezier(0.3, 0, 0, 1);
   --ease-snappy: cubic-bezier(0.2, 0, 0, 1);
+
+  
   /* ... */
+}
+
+.custom-dashed-border {
+  width: 100%;
+  height: 2px; /* 점선 두께 */
+  border: none; /* 기존 border 제거 */
+  background-image: repeating-linear-gradient(
+    to right,
+    white,
+    white 5px,  /* 점선 길이 */
+    transparent 5px,
+    transparent 13px /* 점선 간격 */
+  );
+  background-size: contain; /* 점선이 전체 길이 조절 */
 }

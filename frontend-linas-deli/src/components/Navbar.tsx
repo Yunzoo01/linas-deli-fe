@@ -43,8 +43,14 @@ const Navbar = () => {
       >
         <ul className="flex flex-col space-y-11 pt-11 items-center">
           <li>
-            <Link to ="/" onClick={() => setIsOpen(false)}> 
-              <img src={Icon} alt="Menu Icon" className="w-16 h-16 flex-shrink-0 mb-4" />
+            <Link to="/" onClick={() => setIsOpen(false)}>
+              <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0 mb-4 shadow">
+                <img
+                  src={Icon}
+                  alt="Menu Icon"
+                  className="w-full h-full object-cover scale-101"
+                />
+              </div>
             </Link>
           </li>
           <li><Link to="/menu" className="text-gray-700 hover:text-gray-900" onClick={() => setIsOpen(false)}>Menu</Link></li>
