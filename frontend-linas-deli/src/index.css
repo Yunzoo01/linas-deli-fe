@@ -1,4 +1,8 @@
 @import "tailwindcss";
+@import "swiper/css";
+@import "swiper/css/navigation";
+@import "swiper/css/pagination";
+@import "swiper/css/scrollbar";
 
 /* customizing for tailwind */
 @theme {
@@ -29,4 +33,9 @@
     transparent 13px /* 점선 간격 */
   );
   background-size: contain; /* 점선이 전체 길이 조절 */
+}
+.swiper-button-next::after,
+.swiper-button-prev::after {
+  color: white !important; /* 화살표 색상을 흰색으로 */
+  font-size: 2rem !important; /* 화살표 크기 조절 */
 }
