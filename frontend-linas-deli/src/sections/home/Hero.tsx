@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Pagination, Navigation, Autoplay } from "swiper/modules";
+import { Link } from "react-router-dom";
 
 const Hero = () => {
     const [isMobile, setIsMobile] = useState(false);
@@ -27,7 +28,7 @@ const Hero = () => {
                 autoplay={{ delay: 5000, disableOnInteraction: false }}
                 className="relative w-full h-[40rem] sm:h-[50rem] z-0"
             >
-                {[1, 2, 3, 4, 5, 6].map((num) => (
+                {[1, 2, 3, 4, 5, 6, 7].map((num) => (
                     <SwiperSlide key={num}>
                         <div
                             className="w-full h-[40rem] sm:h-[50rem] bg-cover bg-center"
@@ -49,13 +50,17 @@ const Hero = () => {
 
 
             {/* 텍스트 (고정된 상태) */}
-            <div className="absolute inset-0 z-10 flex flex-col justify-center items-center text-white gap-2 sm:gap-7">
+            <div className="absolute inset-0 z-10 flex flex-col justify-center items-center text-white gap-2 sm:gap-5">
                 <h1 className="text-4xl font-bold mt-10 sm:mt-0 sm:text-8xl">Lina’s Deli</h1>
-                <button className="sm:hidden mt-4 px-6 py-2 bg-white text-sm sm:text- text-black rounded-lg font-medium">ORDER</button>
+                <button className="sm:hidden mt-4 px-6 py-2 bg-white text-sm sm:text- text-black rounded-lg font-medium">
+                    <Link to="/order">ORDER</Link>
+                </button>
                 <p className="mt-2 text-base sm:text-3xl text-center px-10 sm:px-30">
                     At Lina’s, everyone is family, and you’ll find the friendliest service in the city.
                 </p>
-                <button className="hidden sm:block mt-4 px-6 py-2 bg-white text-sm sm:text-3xl text-black rounded-lg font-medium">ORDER</button>
+                <button className="hidden sm:block mt-4 px-6 py-2 bg-white text-sm sm:text-3xl text-black rounded-lg font-medium">
+                    <Link to="/order">ORDER</Link>
+                </button>
             </div>
 
             {/* Swiper 스타일 수정 */}
