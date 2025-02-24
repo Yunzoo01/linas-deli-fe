@@ -16,7 +16,7 @@ const Hero = () => {
     }, []);
 
     return (
-        <div className="relative w-full h-[40rem] sm:h-[50rem]">
+        <div className="relative w-full h-[40rem] lg:h-[50rem]">
             {/* Swiper - 배경 이미지만 변경됨 */}
             <Swiper
                 modules={isMobile ? [Pagination, Autoplay] : [Navigation, Autoplay]}
@@ -26,12 +26,12 @@ const Hero = () => {
                 pagination={isMobile ? { el: '.swiper-pagination', clickable: true, type: 'bullets' } : false}
                 navigation={!isMobile ? { nextEl: ".swiper-button-next", prevEl: ".swiper-button-prev" } : false}
                 autoplay={{ delay: 5000, disableOnInteraction: false }}
-                className="relative w-full h-[40rem] sm:h-[50rem] z-0"
+                className="relative w-full h-[40rem] lg:h-[50rem] z-0"
             >
                 {[1, 2, 3, 4, 5, 6, 7].map((num) => (
                     <SwiperSlide key={num}>
                         <div
-                            className="w-full h-[40rem] sm:h-[50rem] bg-cover bg-center"
+                            className="w-full h-[40rem] lg:h-[50rem] bg-cover bg-center"
                             style={{
                                 backgroundImage: `linear-gradient(rgba(0, 0, 0, ${num === 2 || num === 4 ? 0.3 : 0.5}), rgba(0, 0, 0, ${num === 2 || num === 4 ? 0.3 : 0.5})), url('/Banner/banner${num}.jpeg')`,
                             }}
@@ -50,15 +50,15 @@ const Hero = () => {
 
 
             {/* 텍스트 (고정된 상태) */}
-            <div className="absolute inset-0 z-10 flex flex-col justify-center items-center text-white gap-2 sm:gap-5">
-                <h1 className="text-4xl font-bold mt-10 sm:mt-0 sm:text-8xl">Lina’s Deli</h1>
-                <button className="sm:hidden mt-4 px-6 py-2 bg-white text-sm sm:text- text-black rounded-lg font-medium">
+            <div className="absolute inset-0 z-10 flex flex-col justify-center items-center text-white gap-2 lg:gap-5">
+                <h1 className="text-4xl font-bold mt-10 lg:mt-0 lg:text-8xl">Lina’s Deli</h1>
+                <button className="lg:hidden mt-4 px-6 py-2 bg-white text-sm lg:text- text-black rounded-lg font-medium">
                     <Link to="/order">ORDER</Link>
                 </button>
-                <p className="mt-2 text-base sm:text-3xl text-center px-10 sm:px-30">
+                <p className="mt-2 text-base lg:text-3xl text-center px-10 lg:px-30">
                     At Lina’s, everyone is family, and you’ll find the friendliest service in the city.
                 </p>
-                <button className="hidden sm:block mt-4 px-6 py-2 bg-white text-sm sm:text-3xl text-black rounded-lg font-medium">
+                <button className="hidden lg:block mt-4 px-6 py-2 bg-white text-sm lg:text-3xl text-black rounded-lg font-medium">
                     <Link to="/order">ORDER</Link>
                 </button>
             </div>
