@@ -1,6 +1,6 @@
 const About = () => {
     return (
-        <section className="h-[48rem] mx-auto sm:h-auto sm:px-20 sm:pt-16 sm:pb-40 sm:bg-[#FFFAEF]">
+        <section className="h-auto mx-auto sm:h-auto sm:px-20 sm:pt-16 sm:pb-40 sm:bg-[#FFFAEF]">
             {/* 제목 */}
             <h2 className="sm:text-5xl text-2xl font-bold px-[1.5rem] my-[2.9rem] sm:text-center sm:mb-12">About</h2>
 
