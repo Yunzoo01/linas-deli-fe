@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import Icon from "../assets/logo.png";
+import Logo from "../assets/logo.png";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="bg-[rgba(255,255,255,0.85)] shadow absolute sm:fixed top-0 left-0 w-full z-50 max-w-[120rem] mx-auto">
+    <nav className="bg-[rgba(255,255,255,0.85)] shadow absolute sm:fixed top-0 left-0 w-full z-100 max-w-[120rem] mx-auto">
       <div className="w-full flex h-[3.375rem] justify-end items-center
             sm:h-auto sm:justify-between sm:items-center sm:px-13 sm:py-6 sm:bg-white">
         {/* 로고 */}
@@ -46,8 +46,8 @@ const Navbar = () => {
             <Link to="/" onClick={() => setIsOpen(false)}>
               <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0 mb-4 shadow">
                 <img
-                  src={Icon}
-                  alt="Menu Icon"
+                  src={Logo}
+                  alt="Logo"
                   className="w-full h-full object-cover scale-101"
                 />
               </div>
