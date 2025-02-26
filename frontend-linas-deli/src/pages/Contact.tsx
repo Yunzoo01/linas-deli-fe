@@ -1,4 +1,4 @@
-import { GoogleMap, LoadScript, Marker } from "@react-google-maps/api";
+import { GoogleMap, LoadScriptNext, Marker } from "@react-google-maps/api";
 import storeImage from "../assets/contact/contact.jpeg"; // 매장 이미지
 import logo from "../assets/logo.png"; // 로고
 import { FaPhone, FaEnvelope, FaClock, FaInstagram } from "react-icons/fa";
@@ -21,7 +21,7 @@ const Contact = () => {
     // 🔥 lg에서만 지도 화면을 오른쪽으로 이동
     if (window.innerWidth >= 1024) {
       setTimeout(() => {
-        map.panBy(-100,0); // x축 100px 이동 (오른쪽으로)
+        map.panBy(-100, 0); // x축 100px 이동 (오른쪽으로)
       }, 500); // 맵 로딩 후 실행
     }
   };
@@ -37,16 +37,16 @@ const Contact = () => {
 
         {/* Google Map */}
         <div className="w-full h-[300px] overflow-hidden mb-6 lg:h-[480px]">
-          <LoadScript googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
+          <LoadScriptNext googleMapsApiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
             <GoogleMap
               mapContainerStyle={{ width: "100%", height: "100%" }}
-              center={center} // 핀 위치는 그대로
+              center={center}
               zoom={15}
-              onLoad={handleMapLoad} // 📌 Google Map이 로드될 때 실행
+              onLoad={handleMapLoad}
             >
               <Marker position={center} />
             </GoogleMap>
-          </LoadScript>
+          </LoadScriptNext>
         </div>
 
         {/* 매장 이미지 & 정보 카드 */}
