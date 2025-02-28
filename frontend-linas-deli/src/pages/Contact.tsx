@@ -43,6 +43,10 @@ const Contact = () => {
               center={center}
               zoom={15}
               onLoad={handleMapLoad}
+              options={{
+                disableDefaultUI: false, 
+                streetViewControl: false, // ❌ Street View 제거 (사람 아이콘 삭제)
+              }}
             >
               <Marker position={center} />
             </GoogleMap>
