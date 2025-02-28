@@ -7,7 +7,7 @@ interface PageBannerProps {
         <div>
             <section className="relative w-full h-[380px] lg:h-[260px] flex items-center lg:justify-start justify-center text-center overflow-hidden">
                 {/* 배경 이미지 */}
-                <div className="absolute inset-0 rounded-b-3xl lg:rounded-b-none overflow-hidden">
+                <div className="absolute inset-0 rounded-b-4xl lg:rounded-b-none overflow-hidden">
                     <img
                         src="/Banner/banner1.jpeg"
                         alt="Lina's Deli"
