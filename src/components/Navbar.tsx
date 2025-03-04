@@ -38,7 +38,7 @@ const Navbar = () => {
 
       {/* 모바일 메뉴 */}
       <div
-        className={`sm:hidden fixed top-0 right-0 w-40 h-full bg-white shadow-lg p-4 transform transition-transform duration-300 ease-in-out z-50 ${isOpen ? "translate-x-0" : "translate-x-full"
+        className={`rounded-tl-3xl rounded-bl-3xl lg:hidden fixed top-0 right-0 w-40 h-screen bg-white shadow-lg p-4 transform transition-transform duration-300 ease-in-out z-50 ${isOpen ? "translate-x-0" : "translate-x-full"
           }`}
       >
         <ul className="flex flex-col space-y-11 pt-11 items-center">
