@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
 import Home from "./pages/Home";
@@ -7,21 +7,46 @@ import Contact from "./pages/Contact";
 import Order from "./pages/Order";
 import OrderDetail from "./sections/order/OrderDetail";
 
-function App() {
+import StaffNavbar from "./components/staff/StaffNavbar"
+import StaffLogin from "./pages/staff/StaffLogin";
+import StaffMenu from "./pages/staff/StaffMenu";
+import StaffOrderHistory from "./pages/staff/StaffOrderHistory";
+import StaffPromotion from "./pages/staff/StaffPromotion"
+import StaffMyInfo from "./pages/staff/StaffMyInfo";
+
+const Layout = () => {
+  const location = useLocation();
+  const isStaffPage = location.pathname.startsWith("/staff"); // ✅ 현재 페이지가 "/staff"로 시작하는지 확인
+
   return (
-    <Router>
-      <Navbar />
+    <>
+      {isStaffPage ? <StaffNavbar /> : <Navbar />} {/* ✅ 네비게이션 자동 선택 */}
       <div className="pt-0 sm:pt-20">
-        <Routes>
+      <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/menu" element={<Menu />} />
           <Route path="/order" element={<Order />} />
           <Route path="/order/:boxType" element={<OrderDetail />} />
           <Route path="/contact" element={<Contact />} />
+
+          <Route path="/staff" element={<StaffLogin />} />
+          <Route path="/staff/menu" element={<StaffMenu />} />
+          <Route path="/staff/order" element={<StaffOrderHistory />} />
+          <Route path="/staff/profile" element={<StaffMyInfo />} />
+          <Route path="/staff/promotion" element={<StaffPromotion />} />
         </Routes>
-      </div>
+        </div>
       <Footer />
-    </Router>
+    </>
   );
 };
+
+function App() {
+  return (
+    <Router>
+      <Layout />
+    </Router>
+  );
+}
+
 export default App
