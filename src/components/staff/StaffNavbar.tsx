@@ -24,9 +24,11 @@ const Navbar = () => {
 
         {/* 데스크탑 메뉴 */}
         <ul className="hidden sm:flex space-x-6">
-          <li><Link to="/menu" className="text-gray-700 hover:text-gray-900">Menu</Link></li>
-          <li><Link to="/order" className="text-gray-700 hover:text-gray-900">Order</Link></li>
-          <li><Link to="/contact" className="text-gray-700 hover:text-gray-900">Contact</Link></li>
+          <li><Link to="/staff/menu" className="text-gray-700 hover:text-gray-900">Menu</Link></li>
+          <li><Link to="/staff/order" className="text-gray-700 hover:text-gray-900">Order</Link></li>
+          <li><Link to="/staff/profile" className="text-gray-700 hover:text-gray-900">Profile</Link></li>
+          <li><Link to="/staff/promotion" className="text-gray-700 hover:text-gray-900">Promotion</Link></li>
+          <li className="text-gray-700 hover:text-gray-900">Logout</li>
         </ul>
       </div>
 
