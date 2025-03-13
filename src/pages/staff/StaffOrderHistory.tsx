@@ -1,15 +1,18 @@
 import { useState, useEffect } from "react";
 import StaffPageBanner from "../../components/staff/StaffPageBanner";
 import axios from "axios";
+import StaffOrderModal from "../../components/staff/StaffOrderModal";
 
 const StaffOrderHistory = () => {
   const [orders, setOrders] = useState([]);
+  const [selectedOrder, setSelectedOrder] = useState([]);
   const [totalElements, setTotalElements] = useState(0);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [isOpen, setIsOpen] = useState<boolean>(false); // ✅ 명시적으로 boolean 타입 지정
 
   function formatTime24To12(time) {
     let hours = time;
@@ -68,7 +71,8 @@ const StaffOrderHistory = () => {
   }
 
   return (
-    <div className="bg-[#C3E2C6]">
+    <>
+          <div className="bg-[#C3E2C6]">
       <StaffPageBanner title="Order History" />
       <div className="max-w-6xl mx-auto overflow-hidden py-16">
         <div className="flex flex-col lg:flex-row justify-between items-end mb-4">
@@ -100,12 +104,19 @@ const StaffOrderHistory = () => {
 
         <div className="w-full border-collapse">
           {filteredOrders.map(order => (
-            <div key={order.id} className="flex text-center font-medium bg-white mb-6 py-[12.75px] rounded-[7.5px] ">
+            <div 
+              key={order.id} 
+              className="flex text-center font-medium bg-white mb-6 py-[12.75px] rounded-[7.5px] "
+              onClick={() => {
+                setIsOpen(true);
+                setSelectedOrder(order);
+              }}
+              >
               <div className="flex justify-center items-center w-[15%] border-r border-r-[#52525280] border-r-[1.5px] min-h-[61.5px]">#{order.oid}</div>
               <div className="flex justify-center items-center w-[30%] border-r border-r-[#52525280] border-r-[1.5px]">{order.email}</div>
-              <div className="flex justify-center items-center w-[20%] border-r border-r-[#52525280] border-r-[1.5px]">{order.platter}</div>
+              <div className="flex justify-center items-center w-[20%] border-r border-r-[#52525280] border-r-[1.5px]">{order.platterName}</div>
               <div className="flex justify-center items-center w-[20%] border-r border-r-[#52525280] border-r-[1.5px]">{formatTime24To12(new Date(order.time))} , {formatDate(new Date(order.date))}</div>
-              <div className={`flex justify-center items-center w-[15%] ${order.status === "Pending" ? "text-red-500" : "text-green-500"}`}>
+              <div className={`flex justify-center items-center w-[15%] ${order.status === "decline" ? "text-red-500" : ""}`}>
                 {order.status}
               </div>
             </div>
@@ -115,6 +126,8 @@ const StaffOrderHistory = () => {
         <div className="flex space-x-4 justify-center">{paginationButtons}</div>
       </div>
     </div>
+    <StaffOrderModal isOpen={isOpen} setIsOpen={setIsOpen} order={selectedOrder}/>
+    </>
   );
 }
 
