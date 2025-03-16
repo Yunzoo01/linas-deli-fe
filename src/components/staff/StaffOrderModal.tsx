@@ -22,7 +22,7 @@ const StaffOrderModal = ({ isOpen, setIsOpen, order, updateOrder }) => {
   // 제출 핸들러
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    console.log("📤 Sending formData:", formData);
     try {
       const response = await axios.put(`http://localhost:8080/api/staff/orders/${formData.oid}`, formData, {
         headers: { "Content-Type": "application/json" },
@@ -138,7 +138,7 @@ const StaffOrderModal = ({ isOpen, setIsOpen, order, updateOrder }) => {
                   />
                 </div>
                 <div className="flex justify-end">
-                  <button type="submit" className="w-[30%] mt-3 py-2 bg-[#AD343E] text-white rounded-3xl ml-auto cursor-pointer" onClick={handleSubmit}>
+                  <button type="submit" className="w-[30%] mt-3 py-2 bg-[#AD343E] text-white rounded-3xl ml-auto cursor-pointer">
                     Submit
                   </button>
                 </div>

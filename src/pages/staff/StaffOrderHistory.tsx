@@ -70,9 +70,6 @@ const StaffOrderHistory = () => {
     }
   };
 
-
-
-
   // ✅ API 호출 함수
   const fetchOrdersByKeyword = async () => {
     try {
@@ -141,7 +138,7 @@ const StaffOrderHistory = () => {
 
 
   const updateOrder = (updatedOrder) => {
-    setOrder(updatedOrder);
+    setSelectedOrder(updatedOrder); 
     console.log("Updated Order:", updatedOrder);
   };
   return (
