@@ -6,16 +6,19 @@ import { useNavigate } from "react-router-dom";
 
 const charcuterieItems = [
   {
+    platter_id: 1,
     title: "PETITE",
     serves: "serves 3-4 people",
     image: petiteBox, // import된 이미지 사용
   },
   {
+    platter_id: 2,
     title: "MEDIUM",
     serves: "serves 4-5 people",
     image: mediumBox, // import된 이미지 사용
   },
   {
+    platter_id: 3,
     title: "LARGE",
     serves: "serves 10-12 people",
     image: largeBox, // import된 이미지 사용
