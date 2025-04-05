@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
 import { toast } from "react-toastify";
+import axios from "axios";
 
 
 const OrderForm = () => {
@@ -15,7 +15,7 @@ const OrderForm = () => {
     email: "",
     allergy: "",
     message: "",
-    platter: boxType || ""
+    platterName: boxType || ""
   });
 
   // 입력값 변경 핸들러
@@ -85,8 +85,8 @@ const OrderForm = () => {
           <label className="block font-semibold text-gray-800">Name</label>
           <input
             type="text"
-            name="name"
-            value={formData.name}
+            name="customerName"
+            value={formData.customerName}
             onChange={handleChange}
             placeholder="Enter your name"
             className="w-full p-4 border rounded-4xl border-gray-300 text-lg"

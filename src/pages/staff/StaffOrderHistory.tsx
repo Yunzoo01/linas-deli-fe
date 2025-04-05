@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
-import StaffPageBanner from "../../components/staff/StaffPageBanner";
 import axios from "axios";
+import StaffPageBanner from "../../components/staff/StaffPageBanner";
 import StaffOrderModal from "../../components/staff/StaffOrderModal";
 
 const StaffOrderHistory = () => {
@@ -37,16 +37,16 @@ const StaffOrderHistory = () => {
   //status 검색
   useEffect(() => {
     axios.get(`http://localhost:8080/api/staff/orders?page=${currentPage-1}&size=10&status=${selectedStatus}`, {
+      withCredentials: true,
       headers: {
-        "Authorization": "Bearer your-auth-token",
         "Content-Type": "application/json",
       },
     })
     .then(response => {
-      setOrders(response.data.orderList.content);
-      setTotalElements(response.data.orderList.totalElements);
-      setTotalPages(response.data.orderList.totalPages);
-      setStatuses(response.data.statusCounts);
+      setOrders(response.data.orderList?.content || []);
+      setTotalElements(response.data.orderList?.totalElements || 0);
+      setTotalPages(response.data.orderList?.totalPages || 1);
+      setStatuses(response.data.statusCounts || []);
       setLoading(false);
     })
     .catch(err => {
@@ -75,8 +75,8 @@ const StaffOrderHistory = () => {
     try {
       setLoading(true);
       const response = await axios.get(`http://localhost:8080/api/staff/orders?keyword=${searchKeyword}`, {
+        withCredentials: true,
         headers: {
-          "Authorization": "Bearer your-auth-token",
           "Content-Type": "application/json",
         },
       });
@@ -100,12 +100,13 @@ const StaffOrderHistory = () => {
   // 초기 셋팅
   useEffect(() => {
     axios.get(`http://localhost:8080/api/staff/orders?page=${currentPage-1}&size=10`, {
+      withCredentials: true,
       headers: {
-        "Authorization": "Bearer your-auth-token",
         "Content-Type": "application/json",
       },
     })
     .then(response => {
+  
       setOrders(response.data.orderList.content);
       setTotalElements(response.data.orderList.totalElements);
       setTotalPages(response.data.orderList.totalPages);
@@ -140,6 +141,24 @@ const StaffOrderHistory = () => {
   const updateOrder = (updatedOrder) => {
     setSelectedOrder(updatedOrder); 
     console.log("Updated Order:", updatedOrder);
+  };
+
+  const updateOrderStatus = async (id, newStatus) => {
+    if (newStatus !== "completed" && newStatus !== "decline") {
+      console.error("Invalid status");
+      return;
+    }
+  
+    try {
+      const response = await axios.put(`http://localhost:8080/api/staff/orders/updateStatus/${id}`, null, {
+        params: { status: newStatus },
+      });
+  
+      console.log("Order updated:", response.data);
+      window.location.reload();
+    } catch (error) {
+      console.error("Error updating order status:", error);
+    }
   };
   return (
     <>
@@ -194,17 +213,26 @@ const StaffOrderHistory = () => {
             <div 
               key={order.oid} 
               className="flex text-center font-medium bg-white mb-6 py-[12.75px] rounded-[7.5px] "
-              onClick={() => {
-                setIsOpen(true);
-                setSelectedOrder(order);
-              }}
               >
               <div className="flex justify-center items-center w-[15%] border-r border-r-[#52525280] border-r-[1.5px] min-h-[61.5px]">#{order.oid}</div>
-              <div className="flex justify-center items-center w-[30%] border-r border-r-[#52525280] border-r-[1.5px]">{order.email}</div>
+              <div className="flex justify-center items-center w-[30%] border-r border-r-[#52525280] border-r-[1.5px]"
+                            onClick={() => {
+                              setIsOpen(true);
+                              setSelectedOrder(order);
+                            }}>{order.email}</div>
               <div className="flex justify-center items-center w-[20%] border-r border-r-[#52525280] border-r-[1.5px]">{order.platterName}</div>
               <div className="flex justify-center items-center w-[20%] border-r border-r-[#52525280] border-r-[1.5px]">{formatTime24To12(new Date(order.time))} , {formatDate(new Date(order.date))}</div>
               <div className={`flex justify-center items-center w-[15%] ${order.status === "decline" ? "text-red-500" : ""}`}>
-                {order.status}
+                {order.status === "completed" ? "completed" : order.status === 'decline'? 'decline':
+                 <><button className="bg-green-600 p-1 rounded-sm"
+                            onClick={()=>{
+                             updateOrderStatus(order.oid,'completed')
+                            }}>Complete</button>
+                 <button className="bg-red-700 p-1 rounded-sm"
+                          onClick={()=>{
+                           updateOrderStatus(order.oid,'decline')
+                          }}
+                          >Decline</button></>}
               </div>
             </div>
           ))}
