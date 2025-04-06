@@ -47,7 +47,12 @@ const PromotionList = () => {
     if (search) params.append("keyword", search);
   
     axios
-      .get(`http://localhost:8080/api/staff/promotions?${params.toString()}`)
+      .get(`http://localhost:8080/api/staff/promotions?${params.toString()}`, {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
       .then((res) => {
         setPromotions(res.data.content);
         setTotalPages(res.data.totalPages);
@@ -74,7 +79,12 @@ const PromotionList = () => {
     if (!confirmed) return;
   
     try {
-      await axios.delete(`http://localhost:8080/api/staff/promotions/${id}`);
+      await axios.delete(`http://localhost:8080/api/staff/promotions/${id}`, {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
       fetchPromotions(); // ✅ 서버에서 최신 목록 다시 가져오기
       alert("Promotion deleted successfully!");
     } catch (err) {

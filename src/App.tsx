@@ -134,7 +134,7 @@ const Layout = () => {
             <Route path="/staff/profile" element={<AuthProvider><RequireAuth><StaffMyInfo /></RequireAuth></AuthProvider>} />
           )}
           {isStaffPage && (
-            <Route path="/staff/promotion" element={<AuthProvider><RequireAuth><StaffPromotion /></RequireAuth></AuthProvider>} />
+            <Route path="/staff/promotion" element={<AuthProvider><RequireAuth><StaffPromotionList /></RequireAuth></AuthProvider>} />
           )}
         </Routes>
       </div>
