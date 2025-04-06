@@ -11,7 +11,7 @@ import StaffNavbar from "./components/staff/StaffNavbar"
 import StaffLogin from "./pages/staff/StaffLogin";
 import StaffMenu from "./pages/staff/StaffMenu";
 import StaffOrderHistory from "./pages/staff/StaffOrderHistory";
-import StaffPromotion from "./pages/staff/StaffPromotion"
+import StaffPromotionList from "./pages/staff/StaffPromotionList"
 import StaffMyInfo from "./pages/staff/StaffMyInfo";
 
 const Layout = () => {
@@ -33,7 +33,7 @@ const Layout = () => {
           <Route path="/staff/menu" element={<StaffMenu />} />
           <Route path="/staff/order" element={<StaffOrderHistory />} />
           <Route path="/staff/profile" element={<StaffMyInfo />} />
-          <Route path="/staff/promotion" element={<StaffPromotion />} />
+          <Route path="/staff/promotion" element={<StaffPromotionList />} />
         </Routes>
         </div>
       <Footer />
