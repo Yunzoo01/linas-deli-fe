@@ -144,20 +144,23 @@ const StaffOrderHistory = () => {
   };
 
   const updateOrderStatus = async (id, newStatus) => {
-    if (newStatus !== "completed" && newStatus !== "decline") {
+    if (newStatus !== "completed" && newStatus !== "decline" && newStatus !== "complete_decline") {
       console.error("Invalid status");
       return;
     }
-  
+
     try {
-      const response = await axios.put(`http://localhost:8080/api/staff/orders/updateStatus/${id}`, null, {
-        params: { status: newStatus },
-      });
-  
+      const response = await axios.put(
+        `http://localhost:8080/api/staff/orders/updateStatus/${id}?status=${newStatus}`,
+        {}, // 요청 본문이 필요 없는 경우 빈 객체 전달
+        { withCredentials: true }
+      );
+
       console.log("Order updated:", response.data);
-      window.location.reload();
+      window.location.reload(); // 상태 업데이트 후 페이지 리로드
     } catch (error) {
       console.error("Error updating order status:", error);
+      alert("Failed to update order status."); // 사용자에게 알림
     }
   };
   return (
