@@ -1,4 +1,3 @@
-import qs from "qs";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -15,20 +14,20 @@ const StaffLogin = () => {
     setLoading(true);
 
     try {
-      const requestData = qs.stringify({ id, password }); // ✅ qs 사용하여 문자열 변환
+      const requestData = new URLSearchParams({ id, password });
 
       const response = await axios.post(
         "http://localhost:8080/api/auth/login",
-        requestData, // ✅ qs 변환된 데이터 전송
+        requestData,
         {
           headers: {
-            "Content-Type": "application/x-www-form-urlencoded", // ✅ 필요하면 수정
+            "Content-Type": "application/x-www-form-urlencoded",
           },
           withCredentials: true,
         }
       );
 
-      console.log(response); // 응답 확인용 로그
+      console.log(response);
 
       if (response.status === 200 && response.data.user) {
         const { user } = response.data;
@@ -50,30 +49,52 @@ const StaffLogin = () => {
       setLoading(false);
     }
   };
-  
 
   return (
-    <form onSubmit={handleLogin}>
-      <input
-        type="text"
-        value={id}
-        onChange={(e) => setId(e.target.value)}
-        placeholder="Id"
-        required
-        disabled={loading}
-      />
-      <input
-        type="password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        placeholder="Password"
-        required
-        disabled={loading}
-      />
-      <button type="submit" disabled={loading}>
-        {loading ? "로그인 중..." : "로그인"}
-      </button>
-    </form>
+    <div className="min-h-screen bg-cover bg-center flex items-center justify-center" style={{ backgroundImage: 'url(/Banner/banner1.jpeg)' }}>
+      <div className="bg-transparent p-8 rounded-lg w-full sm:w-[530px]">
+        <div className="text-center mb-8">
+          <h1 className="text-[97.5px] font-bold text-white">Lina's Deli</h1>
+        </div>
+        <form onSubmit={handleLogin}>
+          <div className="mb-6">
+            <div className="flex items-center border border-white rounded-lg overflow-hidden">
+              <span className="p-3 text-white"><img src="/Icon/icon_user.png"></img></span>
+              <input
+                type="text"
+                value={id}
+                onChange={(e) => setId(e.target.value)}
+                placeholder="USERNAME"
+                required
+                disabled={loading}
+                className="w-full px-4 py-2 border-none outline-none focus:ring-2 focus:ring-blue-500 bg-transparent text-white"
+              />
+            </div>
+          </div>
+          <div className="mb-6">
+            <div className="flex items-center border border-white rounded-lg overflow-hidden">
+              <span className="p-3 text-white"><img src="/Icon/icon_lock.png"></img></span>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="PASSWORD"
+                required
+                disabled={loading}
+                className="w-full px-4 py-2 border-none outline-none focus:ring-2 focus:ring-blue-500 bg-transparent text-white"
+              />
+            </div>
+          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3 text-white bg-blue-500 hover:bg-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            {loading ? "로그인 중..." : "LOGIN"}
+          </button>
+        </form>
+      </div>
+    </div>
   );
 };
 
