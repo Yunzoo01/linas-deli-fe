@@ -165,7 +165,7 @@ const StaffOrderHistory = () => {
   };
   return (
     <>
-          <div className="bg-[#C3E2C6]">
+      <div className="bg-[#C3E2C6]">
       <StaffPageBanner title="Order History" />
       <div className="max-w-6xl mx-auto overflow-hidden py-16">
         <div className="flex flex-col lg:flex-row justify-between items-end mb-4">
