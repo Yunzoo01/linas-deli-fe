@@ -1,8 +1,8 @@
 import { GoogleMap, LoadScriptNext, Marker } from "@react-google-maps/api";
-import storeImage from "../assets/contact/contact.jpeg"; // 매장 이미지
-import logo from "../assets/logo.png"; // 로고
+import storeImage from "@/assets/contact/contact.jpeg"; // 매장 이미지
+import logo from "@/assets/logo.png"; // 로고
 import { FaPhone, FaEnvelope, FaClock, FaInstagram } from "react-icons/fa";
-import PageBanner from "../components/PageBanner";
+import PageBanner from "@/components/PageBanner";
 import { useRef } from "react";
 
 

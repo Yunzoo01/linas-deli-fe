@@ -1,11 +1,18 @@
-import React, { createContext, useState, useEffect, useContext } from "react";
-import axios from "axios";
+import { createContext, useState, useEffect, useContext, ReactNode } from "react";
+import { User } from "@/type"
+import api from "@/api/axios";
+
+interface AuthContextType {
+  user: User | null;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  loading: boolean;
+}
 
 // AuthContext 생성
-const AuthContext = createContext(null);
+const AuthContext = createContext<AuthContextType | null>(null);
 
 // AuthProvider 생성
-export const AuthProvider = ({ children }) => {
+export const AuthProvider = ({ children }: {children:ReactNode}) => {
   const [user, setUser] = useState(() => {
     // 초기 user 값 설정
     const storedUser = localStorage.getItem("user");
@@ -20,8 +27,8 @@ export const AuthProvider = ({ children }) => {
       setUser(JSON.parse(storedUser));
       setLoading(false);
     } else {
-      axios
-        .get('http://localhost:8080/api/auth/session', { withCredentials: true })
+      api
+        .get('api/auth/session')
         .then((response) => {
           const data = response.data;
           if (data.authenticated) {

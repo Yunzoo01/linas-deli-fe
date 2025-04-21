@@ -1,9 +1,9 @@
 import { useParams } from "react-router-dom";
 import OrderForm from "./OrderForm";
-import petiteBox from "../../assets/home/order/board1.jpeg";
-import mediumBox from "../../assets/home/order/board2.jpeg";
-import largeBox from "../../assets/home/order/board3.jpeg";
-import PageBanner from "../../components/PageBanner";
+import petiteBox from "@/assets/home/order/board1.jpeg";
+import mediumBox from "@/assets/home/order/board2.jpeg";
+import largeBox from "@/assets/home/order/board3.jpeg";
+import PageBanner from "@/components/PageBanner";
 
 const boxData = {
     PETITE: {

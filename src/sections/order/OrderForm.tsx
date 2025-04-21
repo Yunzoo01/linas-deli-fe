@@ -1,12 +1,14 @@
 import { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import axios from "axios";
-
+import api from "@/api/axios";
+import { AxiosError } from "axios"; // Import AxiosError
 
 const OrderForm = () => {
   const { boxType } = useParams();
+  const navigate = useNavigate(); // Initialize navigate
   console.log(boxType);
+
   const [formData, setFormData] = useState({
     date: "",
     time: "",
@@ -18,32 +20,46 @@ const OrderForm = () => {
     platterName: boxType || ""
   });
 
-  // 입력값 변경 핸들러
-  const handleChange = (e) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 제출 핸들러
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    // Basic validation
+    if (!formData.date || !formData.time || !formData.customerName || !formData.phone || !formData.email) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
     console.log("📤 Sending formData:", formData);
     try {
-      const response = await axios.post(`http://localhost:8080/api/orders`, formData, {
-        headers: { "Content-Type": "application/json" },
-      });
-
+      const response = await api.post("/api/orders", formData);
       console.log("Create Success:", response.data);
+      toast.success("Order submitted successfully!");
+      navigate("/order");
     } catch (error) {
-      console.error("Create Failed:", error.response?.data || error.message);
+      const err = error as AxiosError;
+      console.error("Create Failed:", err.response?.data || err.message);
+      toast.error("Failed to submit order.");
     }
   };
+
+  // Compute tomorrow's date for min date
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const minDate = tomorrow.toISOString().split("T")[0];
+
   return (
     <div className="max-w-4xl mx-auto">
-      {/* 주문 폼 */}
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-        <input type="hidden" name="platter" value={formData.platter}/>
-        {/* ✅ Date | Time */}
+        <input type="hidden" name="platter" value={formData.platterName} />
+
+        {/* Date | Time */}
         <div>
           <label className="block text-gray-800 font-semibold">Date</label>
           <input
@@ -52,12 +68,12 @@ const OrderForm = () => {
             value={formData.date}
             onChange={handleChange}
             className="w-full p-4 border text-gray-800 rounded-4xl border-gray-300 text-lg"
-            min={new Date(new Date().setDate(new Date().getDate() + 1)).toISOString().split("T")[0]}
+            min={minDate} // Use the computed minDate here
           />
         </div>
         <div>
           <label className="block font-semibold text-gray-800">Time</label>
-          <select 
+          <select
             name="time"
             value={formData.time}
             onChange={handleChange}
@@ -77,10 +93,11 @@ const OrderForm = () => {
             <option value="15:00:00">15:00</option>
             <option value="15:30:00">15:30</option>
             <option value="16:00:00">16:00</option>
+            {/* Times here */}
           </select>
         </div>
 
-        {/* ✅ Name (1컬럼 전체) */}
+        {/* Name */}
         <div className="md:col-span-2">
           <label className="block font-semibold text-gray-800">Name</label>
           <input
@@ -93,7 +110,7 @@ const OrderForm = () => {
           />
         </div>
 
-        {/* ✅ Phone | Email */}
+        {/* Phone | Email */}
         <div>
           <label className="block font-semibold text-gray-800">Phone</label>
           <input
@@ -117,7 +134,7 @@ const OrderForm = () => {
           />
         </div>
 
-        {/* ✅ Allergy (1컬럼 전체) */}
+        {/* Allergy */}
         <div className="md:col-span-2">
           <label className="block font-semibold text-gray-800">Allergy</label>
           <textarea
@@ -129,7 +146,7 @@ const OrderForm = () => {
           ></textarea>
         </div>
 
-        {/* ✅ Order Message (1컬럼 전체) */}
+        {/* Order Message */}
         <div className="md:col-span-2">
           <label className="block font-semibold text-gray-800">Order Message</label>
           <textarea
@@ -140,9 +157,12 @@ const OrderForm = () => {
           ></textarea>
         </div>
 
-        {/* ✅ 중앙 정렬된 Order 버튼 (1컬럼 전체) */}
+        {/* Submit Button */}
         <div className="md:col-span-2 flex justify-center mt-6">
-          <button type="submit" className="w-1/2 p-4 bg-[#AD343E] text-white text-lg rounded-4xl flex items-center justify-center hover:bg-[#7D3225] transition">
+          <button
+            type="submit"
+            className="w-1/2 p-4 bg-[#AD343E] text-white text-lg rounded-4xl flex items-center justify-center hover:bg-[#7D3225] transition"
+          >
             Order →
           </button>
         </div>

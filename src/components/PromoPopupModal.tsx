@@ -1,12 +1,7 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { X } from "lucide-react";
-
-interface Promotion {
-  promotionId: number;
-  promotionTitle: string;
-  promotionImageUrl?: string;
-}
+import { Promotion } from "@/type";
 
 interface Props {
   promotion: Promotion;

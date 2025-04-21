@@ -1,8 +1,8 @@
 import { useState } from "react";
-import menu1 from "../../assets/home/bestmenu/menu1.png";
-import menu2 from "../../assets/home/bestmenu/menu2.jpeg";
-import menu3 from "../../assets/home/bestmenu/menu3.jpeg";
-import menu4 from "../../assets/home/bestmenu/menu4.png";
+import menu1 from "@/assets/home/bestmenu/menu1.png";
+import menu2 from "@/assets/home/bestmenu/menu2.jpeg";
+import menu3 from "@/assets/home/bestmenu/menu3.jpeg";
+import menu4 from "@/assets/home/bestmenu/menu4.png";
 
 const categories = ["Popular", "Meat", "Cheese", "Others"];
 

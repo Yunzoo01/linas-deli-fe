@@ -1,16 +1,9 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { X } from "lucide-react";
-
-interface Promotion {
-  promotionId: number;
-  promotionTitle: string;
-  promotionImageUrl?: string;
-  startDate: string;
-  endDate: string;
-}
+import { Promotion } from "@/type";
+import api from "@/api/axios";
 
 interface Props {
   isOpen: boolean;
@@ -45,11 +38,7 @@ const StaffEditPromoModal: React.FC<Props> = ({ isOpen, onClose, promotion, onSu
     if (image) formData.append("image", image);
 
     try {
-      await axios.put(`http://localhost:8080/api/staff/promotions/${promotion.promotionId}`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      await api.put(`/api/staff/promotions/${promotion.promotionId}`, formData);
       alert("Promotion updated!");
       onClose();
       onSuccess();

@@ -1,16 +1,8 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { X } from "lucide-react";
+import { Promotion } from "@/type";
 
-interface Promotion {
-  promotionId: number;
-  promotionTitle: string;
-  promotionImageUrl?: string;
-  startDate: string;
-  endDate: string;
-  createdAt: string;
-  updatedAt: string;
-}
 
 interface Props {
   isOpen: boolean;

@@ -1,21 +1,10 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
-import StaffPageBanner from "../../components/staff/StaffPageBanner";
-import StaffPromoModal from "../../components/staff/StaffPromoModal";
-import StaffAddPromoModal from "../../components/staff/StaffAddPromoModal";
-import StaffEditPromoModal from "../../components/staff/StaffEditPromoModal";
-
-interface Promotion {
-  promotionId: number;
-  promotionTitle: string;
-  promotionImageName: string;
-  promotionImageUrl: string;
-  startDate: string;
-  endDate: string;
-  createdAt: string;
-  updatedAt: string;
-  status?: string;
-}
+import StaffPageBanner from "@/components/staff/StaffPageBanner";
+import StaffPromoModal from "@/components/staff/StaffPromoModal";
+import StaffAddPromoModal from "@/components/staff/StaffAddPromoModal";
+import StaffEditPromoModal from "@/components/staff/StaffEditPromoModal";
+import { Promotion } from "@/type";
+import api from "@/api/axios";
 
 
 const PromotionList = () => {
@@ -32,27 +21,19 @@ const PromotionList = () => {
   const [selectedPromo, setSelectedPromo] = useState<Promotion | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  const [isDetailOpen, setIsDetailOpen] = useState(false);                    // 상세 모달 열림 여부
-
-  const [editTarget, setEditTarget] = useState<Promotion | null>(null);       // 수정용
-  const [isEditOpen, setIsEditOpen] = useState(false);                        // 수정 모달 열림 여부
-
+  const [editTarget, setEditTarget] = useState<Promotion | null>(null); // 수정용
+  const [isEditOpen, setIsEditOpen] = useState(false); // 수정 모달 열림 여부
 
   const fetchPromotions = () => {
     setLoading(true);
-  
+
     const params = new URLSearchParams();
     params.append("page", (currentPage - 1).toString());
     params.append("size", "10");
     if (search) params.append("keyword", search);
-  
-    axios
-      .get(`http://localhost:8080/api/staff/promotions?${params.toString()}`, {
-        withCredentials: true,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
+
+    api
+      .get(`/api/staff/promotions?${params.toString()}`)
       .then((res) => {
         setPromotions(res.data.content);
         setTotalPages(res.data.totalPages);
@@ -65,8 +46,8 @@ const PromotionList = () => {
   };
 
   useEffect(() => {
-      fetchPromotions();  // ✅ 분리된 함수 호출
-}, [currentPage, search]);
+    fetchPromotions(); // ✅ 분리된 함수 호출
+  }, [currentPage, search]);
 
   const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -77,14 +58,9 @@ const PromotionList = () => {
   const handleDelete = async (id: number) => {
     const confirmed = window.confirm("Are you sure you want to delete this promotion?");
     if (!confirmed) return;
-  
+
     try {
-      await axios.delete(`http://localhost:8080/api/staff/promotions/${id}`, {
-        withCredentials: true,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      await api.delete(`/api/staff/promotions/${id}`);
       fetchPromotions(); // ✅ 서버에서 최신 목록 다시 가져오기
       alert("Promotion deleted successfully!");
     } catch (err) {
@@ -92,15 +68,14 @@ const PromotionList = () => {
       console.error(err);
     }
   };
-  
+
   const paginationButtons = [];
   for (let i = 1; i <= totalPages; i++) {
     paginationButtons.push(
       <button
         key={i}
         onClick={() => setCurrentPage(i)}
-        className={`px-3 py-1 rounded-3xl ${currentPage === i ? "bg-[#8E5927] text-white" : "bg-white text-black"
-          }`}
+        className={`px-3 py-1 rounded-3xl ${currentPage === i ? "bg-[#8E5927] text-white" : "bg-white text-black"}`}
       >
         {i}
       </button>
@@ -143,7 +118,6 @@ const PromotionList = () => {
 
         {/* 📋 테이블 헤더 */}
         <div className="w-full border-[#525252] flex border-t border-b my-3 font-bold text-base py-2 bg-white rounded-t-md">
-          {/* <div className="w-[15%] text-center">Promo ID</div> */}
           <div className="w-[40%] text-center">Title</div>
           <div className="w-[40%] text-center">Date</div>
           <div className="w-[20%] text-center">Delete</div>
@@ -160,7 +134,6 @@ const PromotionList = () => {
                 setIsOpen(true);
               }}
             >
-              {/* <div className="w-[15%] border-r border-[#ddd]">#{promo.promotionId}</div> */}
               <div className="w-[40%] border-r border-[#ddd]">{promo.promotionTitle}</div>
               <div className="w-[40%] border-r border-[#ddd]">
                 {new Date(promo.startDate).toLocaleDateString()} -{" "}
@@ -209,14 +182,14 @@ const PromotionList = () => {
 
       {/* add모달 컴포넌트 */}
       <StaffAddPromoModal
-         isOpen={isAddModalOpen}
-         onClose={() => setIsAddModalOpen(false)}
-         onSuccess={() => {
-           setIsAddModalOpen(false);
-           setCurrentPage(1);
-           setSearch("");
-           fetchPromotions(); // ✅ 추가 후 다시 불러오기
-         }}
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSuccess={() => {
+          setIsAddModalOpen(false);
+          setCurrentPage(1);
+          setSearch("");
+          fetchPromotions(); // ✅ 추가 후 다시 불러오기
+        }}
       />
     </div>
   );

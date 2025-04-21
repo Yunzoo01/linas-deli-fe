@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import { toast } from "react-toastify";
+import api from "@/api/axios";
+import { AxiosError } from "axios";
 
 const StaffLogin = () => {
   const [id, setId] = useState("");
@@ -9,19 +10,18 @@ const StaffLogin = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (e) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
 
     try {
       const requestData = new URLSearchParams({ id, password });
-
-      const response = await axios.post(
-        "http://localhost:8080/api/auth/login",
+      const response = await api.post(
+        "/api/auth/login",
         requestData,
         {
           headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
+            "Content-Type": "application/x-www-form-urlencoded", // 여기서만 수정
           },
           withCredentials: true,
         }
@@ -42,9 +42,13 @@ const StaffLogin = () => {
       } else {
         toast.error("로그인 정보가 올바르지 않습니다.");
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("로그인 에러:", error);
-      toast.error(error.response?.data?.message || "네트워크 오류가 발생했습니다.");
+      if (error instanceof AxiosError) {
+        toast.error(error.response?.data?.message || "네트워크 오류가 발생했습니다.");
+      } else {
+        toast.error("예기치 못한 오류가 발생했습니다.");
+      }
     } finally {
       setLoading(false);
     }
@@ -52,14 +56,16 @@ const StaffLogin = () => {
 
   return (
     <div className="min-h-screen bg-cover bg-center flex items-center justify-center" style={{ backgroundImage: 'url(/Banner/banner1.jpeg)' }}>
-      <div className="bg-transparent p-8 rounded-lg w-full sm:w-[530px]">
+      {/* 검은색 투명 레이어 (rgba 사용) */}
+      <div className="absolute inset-0" style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}></div>
+        <div className="bg-transparent p-8 rounded-lg w-full sm:w-[530px] z-100">
         <div className="text-center mb-8">
-          <h1 className="text-[97.5px] font-bold text-white">Lina's Deli</h1>
+          <h1 className="text-5xl sm:text-[97.5px] font-bold text-white">Lina's Deli</h1>
         </div>
         <form onSubmit={handleLogin}>
           <div className="mb-6">
             <div className="flex items-center border border-white rounded-lg overflow-hidden">
-              <span className="p-3 text-white"><img src="/Icon/icon_user.png"></img></span>
+              <span className="p-3 text-white"><img src="/Icon/icon_user.png" alt="User" /></span>
               <input
                 type="text"
                 value={id}
@@ -73,7 +79,7 @@ const StaffLogin = () => {
           </div>
           <div className="mb-6">
             <div className="flex items-center border border-white rounded-lg overflow-hidden">
-              <span className="p-3 text-white"><img src="/Icon/icon_lock.png"></img></span>
+              <span className="p-3 text-white"><img src="/Icon/icon_lock.png" alt="Lock" /></span>
               <input
                 type="password"
                 value={password}
@@ -88,13 +94,14 @@ const StaffLogin = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 text-white bg-blue-500 hover:bg-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full py-3 text-[#AD343E] bg-[#f2f2f2] font-bold rounded-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
-            {loading ? "로그인 중..." : "LOGIN"}
+            {loading ? "loading..." : "LOGIN"}
           </button>
         </form>
       </div>
     </div>
+
   );
 };
 

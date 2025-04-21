@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import Logo from "../../assets/logo.png";
-import axios from "axios";
+import Logo from "@/assets/logo.png";
 import { useNavigate } from "react-router-dom";
+import api from "@/api/axios";
 
 const StaffNavbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,16 +22,11 @@ const StaffNavbar = () => {
   const handleLogout = async () => {
     try {
       const sessionID = sessionStorage.getItem("sessionId");
-      const response = await axios.post(
-        "http://localhost:8080/api/auth/logout",
-        {},
-        {
-          headers: {
-            "Session-ID": sessionID,
-          },
-          withCredentials: true,
-        }
-      );
+      const response = await api.post("/api/auth/logout", {}, {
+        headers: {
+          "Session-ID": sessionID || "",
+        },
+      });
   
       if (response.status === 200) {
         console.log("Logout successful!");

@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 const SearchBar = () => {
   const [searchTerm, setSearchTerm] = useState('');
 
-  const handleInputChange = (event) => {
+  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(event.target.value);
   };
 
@@ -16,11 +16,17 @@ const SearchBar = () => {
     setSearchTerm('');
   };
 
+  const handleInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
   return (
-    <div className="flex items-center border border-gray-300 rounded-full p-2 bg-white shadow-md mx-6">
+    <div className="flex items-center border border-gray-300 rounded-full p-2 bg-white shadow-md lg:mx-6">
       <div className="pl-3 pr-2">
         {/* 돋보기 아이콘 대체 */}
-        <image className="block w-10 h-10" src="/Icon/icon_search.svg"/>
+        <img className="block w-10 h-10" src="/Icon/icon_search.svg" alt="search icon" />
       </div>
       <input
         type="text"
@@ -28,6 +34,7 @@ const SearchBar = () => {
         placeholder="Search"
         value={searchTerm}
         onChange={handleInputChange}
+        onKeyDown={handleInputKeyDown}
       />
       {searchTerm && (
         <button

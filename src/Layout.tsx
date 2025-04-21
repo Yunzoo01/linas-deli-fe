@@ -15,31 +15,38 @@ import StaffMyInfo from "./pages/staff/StaffMyInfo";
 import StaffAddMenuForm from "./pages/staff/menu/StaffAddMenuForm";
 import { useAuth } from "./auth/AuthContext";
 import StaffUpdateMenuForm from "./pages/staff/menu/StaffUpdateMenuForm";
+import { ReactNode } from "react";  // Import ReactNode
 
 // 로그인된 사용자만 접근 가능한 컴포넌트
-const RequireAuth = ({ children }) => {
+const RequireAuth = ({ children }: { children: ReactNode }) => {
   const { user, loading } = useAuth();  // useAuth 훅으로 로그인 상태 가져오기
   const location = useLocation();
 
   if (loading) return <Spinner />;
   if (!user)
     return <Navigate to="/staff/login" state={{ from: location }} replace />;
-  return children;
+  return <>{children}</>; // Wrap children in a fragment to return
 };
 
 const Layout = () => {
   const location = useLocation();
   const isStaffPage = location.pathname.startsWith("/staff");
+  const isLoginPage = location.pathname === "/staff/login"; // 로그인 페이지인지 확인
 
   return (
     <>
-      {location.pathname !== "/staff/login"
-        ? isStaffPage
-          ? <StaffNavbar />
-          : <Navbar />
-        : ""}
+      {/* 로그인 페이지가 아닐 때만 Navbar 추가 */}
+      {location.pathname !== "/staff/login" ? (
+        isStaffPage ? (
+          <StaffNavbar />
+        ) : (
+          <Navbar />
+        )
+      ) : (
+        ""
+      )}
 
-      <div className="pt-0 sm:pt-20 text-base">
+      <div className={`pt-0 ${!isLoginPage ? "sm:pt-20" : ""} text-base`}> {/* 로그인 페이지일 경우 sm:pt-20을 제외 */}
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/menu" element={<Menu />} />
@@ -67,26 +74,28 @@ const Layout = () => {
 const Spinner = () => (
   <div className="spinner">
     <div className="circle"></div>
-    <style jsx="true">{`
-      .spinner {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100vh;
-      }
-      .circle {
-        border: 4px solid transparent;
-        border-top: 4px solid #007bff;
-        border-radius: 50%;
-        width: 50px;
-        height: 50px;
-        animation: spin 1s linear infinite;
-      }
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-    `}</style>
+    <style>
+      {`
+        .spinner {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+        }
+        .circle {
+          border: 4px solid transparent;
+          border-top: 4px solid #007bff;
+          border-radius: 50%;
+          width: 50px;
+          height: 50px;
+          animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}
+    </style>
   </div>
 );
 

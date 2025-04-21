@@ -1,8 +1,7 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
-import MenuCategory from "../../components/menu/MenuCategory";
-import SearchBar from "../../components/SearchBar";
-import StaffPageBanner from "../../components/staff/StaffPageBanner";
+import MenuCategory from "@/components/menu/MenuCategory";
+import SearchBar from "@/components/SearchBar";
+import StaffPageBanner from "@/components/staff/StaffPageBanner";
 
 const productDetails = [
   {
@@ -44,12 +43,12 @@ const StaffMenu = () => {
         <MenuCategory/>
 
         {/* Main Content */}
-        <main className="flex-1 px-10 py-8 min-h-lvh ">
+        <main className="flex-1 px-2 lg:px-10 py-4 lg:py-8 min-h-lvh ">
           {/* Search + Add */}
           <div className="flex flex-col mb-6">
           <SearchBar/>
             <button
-              className="bg-[#A73F3F] hover:bg-[#8f3535] px-6 py-2 text-white rounded-lg w-[82px] ml-auto mr-10 mt-3"
+              className="bg-[#A73F3F] hover:bg-[#8f3535] px-6 py-2 text-white rounded-lg w-[82px] ml-auto lg:mr-10 mt-3"
               onClick={handleAddClick}
             >+Add</button>
           </div>
@@ -59,7 +58,7 @@ const StaffMenu = () => {
             <span className="col-span-3">Image</span>
             <span className="col-span-2">Code</span>
             <span className="col-span-5">Product name</span>
-            <span className="col-span-2 text-center">Sold Out</span>
+            <span className="col-span-2 text-center">In Stock</span>
           </div>
 
           {/* Product List */}

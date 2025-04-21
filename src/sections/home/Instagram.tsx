@@ -1,11 +1,11 @@
-import instaLogo from "../../assets/home/instagram/instagram_logo.png";
-import img1 from "../../assets/home/instagram/instagram1.png";
-import img2 from "../../assets/home/instagram/instagram2.png";
-import img3 from "../../assets/home/instagram/instagram3.png";
-import img4 from "../../assets/home/instagram/instagram4.png";
-import img5 from "../../assets/home/instagram/instagram5.png";
-import img6 from "../../assets/home/instagram/instagram6.png";
-import img7 from "../../assets/home/instagram/instagram7.png";
+import instaLogo from "@/assets/home/instagram/instagram_logo.png";
+import img1 from "@/assets/home/instagram/instagram1.png";
+import img2 from "@/assets/home/instagram/instagram2.png";
+import img3 from "@/assets/home/instagram/instagram3.png";
+import img4 from "@/assets/home/instagram/instagram4.png";
+import img5 from "@/assets/home/instagram/instagram5.png";
+import img6 from "@/assets/home/instagram/instagram6.png";
+import img7 from "@/assets/home/instagram/instagram7.png";
 
 const instagramPosts = [
     { img: img1, link: "https://www.instagram.com/p/DAB2YSqyWBC/?utm_source=ig_web_copy_link&igsh=MzRlODBiNWFlZA==" },

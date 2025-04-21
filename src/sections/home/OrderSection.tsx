@@ -1,9 +1,9 @@
-import board1 from "../../assets/home/order/board1.jpeg";
-import board2 from "../../assets/home/order/board2.jpeg";
-import board3 from "../../assets/home/order/board3.jpeg";
-import board4 from "../../assets/home/order/board4.jpeg";
-import board5 from "../../assets/home/order/board5.jpeg";
-import board6 from "../../assets/home/order/board6.jpeg";
+import board1 from "@/assets/home/order/board1.jpeg";
+import board2 from "@/assets/home/order/board2.jpeg";
+import board3 from "@/assets/home/order/board3.jpeg";
+import board4 from "@/assets/home/order/board4.jpeg";
+import board5 from "@/assets/home/order/board5.jpeg";
+import board6 from "@/assets/home/order/board6.jpeg";
 import { Link } from "react-router-dom";
 
 const OrderSection = () => {

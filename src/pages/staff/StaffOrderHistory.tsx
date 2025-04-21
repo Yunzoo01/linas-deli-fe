@@ -1,252 +1,191 @@
 import { useState, useEffect } from "react";
-import axios from "axios";
-import StaffPageBanner from "../../components/staff/StaffPageBanner";
-import StaffOrderModal from "../../components/staff/StaffOrderModal";
+import StaffPageBanner from "@/components/staff/StaffPageBanner";
+import StaffOrderModal from "@/components/staff/order/StaffOrderModal";
+import { Order } from "@/type"; 
+import api from "@/api/axios";
+import StaffOrderRow from "@/components/staff/order/StaffOrderRow";
+import StaffOrderStatus from "@/components/staff/order/StaffOrderStatus";
+import Pagination from "@/components/Pagination"; // 페이지 네이션 컴포넌트 import
+
+type StatusCountType = {
+  status: string;
+  count: number;
+};
 
 const StaffOrderHistory = () => {
-  const [orders, setOrders] = useState([]);
-  const [statuses, setStatuses] = useState([]);
-  const [selectedOrder, setSelectedOrder] = useState([]);
-  const [totalElements, setTotalElements] = useState(0);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [statuses, setStatuses] = useState<StatusCountType[]>([]);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [isOpen, setIsOpen] = useState<boolean>(false); // ✅ 명시적으로 boolean 타입 지정
+  const [isOpen, setIsOpen] = useState<boolean>(false);
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [searchKeyword, setSearchKeyword] = useState("");
 
-  function formatTime24To12(timeString) {
-    const time = Number(timeString);
-    if (isNaN(time)) return "Invalid time"; // 오류 방지
-  
-    let hours = time;
-    const period = hours >= 12 ? "P.M" : "A.M";
-    hours = hours % 12 || 12; // 0시는 12로 변환
-    return `${hours}:00 ${period}`;
-  }
-  
+  function formatTime24To12(timeString: string) {
+    const [hourStr, minuteStr] = timeString.split(":");
+    const hours = parseInt(hourStr, 10);
+    const minutes = parseInt(minuteStr, 10);
 
-  function formatDate(dateString) {
+    if (isNaN(hours) || isNaN(minutes)) return "Invalid time";
+
+    const period = hours >= 12 ? "PM" : "AM";
+    const formattedHour = hours % 12 === 0 ? 12 : hours % 12;
+    const formattedMinute = minuteStr.padStart(2, "0");
+
+    return `${formattedHour}:${formattedMinute} ${period}`;
+  }
+
+  function formatDate(dateString: string) {
     const date = new Date(dateString);
-    const options = { month: 'short', day: 'numeric' };
-    return date.toLocaleDateString('en-US', options);
+    const options: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" };
+    return date.toLocaleDateString("en-US", options);
   }
 
-  //status 검색
   useEffect(() => {
-    axios.get(`http://localhost:8080/api/staff/orders?page=${currentPage-1}&size=10&status=${selectedStatus}`, {
-      withCredentials: true,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-    .then(response => {
-      setOrders(response.data.orderList?.content || []);
-      setTotalElements(response.data.orderList?.totalElements || 0);
-      setTotalPages(response.data.orderList?.totalPages || 1);
-      setStatuses(response.data.statusCounts || []);
-      setLoading(false);
-    })
-    .catch(err => {
-      setError("Error fetching data: " + err.message);
-      setLoading(false);
-    });
-  }, [currentPage, selectedStatus]); // ✅ currentPage 또는 selectedStatus가 변경될 때만 실행
+    const fetchOrders = async () => {
+      setLoading(true);
+      try {
+        const params: any = {
+          page: currentPage - 1,
+          size: 10,
+        };
   
-  // ✅ 상태 변경 함수
+        if (searchKeyword) {
+          params.keyword = searchKeyword;
+        }
+  
+        if (selectedStatus !== "All") {
+          params.status = selectedStatus;
+        }
+  
+        const queryString = new URLSearchParams(params).toString();
+        const response = await api.get(`/api/staff/orders?${queryString}`);
+  
+        setOrders(response.data.orderList.content);
+        setTotalPages(response.data.orderList.totalPages);
+        setStatuses(response.data.statusCounts);
+      } catch (err) {
+        if (err instanceof Error) setError("Error fetching data: " + err.message);
+        else setError("Unknown error fetching data");
+      } finally {
+        setLoading(false);
+      }
+    };
+  
+    fetchOrders();
+  }, [currentPage, searchKeyword, selectedStatus]);
+  
+
   function searchByStatus(status: string) {
     setSelectedStatus(status);
     setCurrentPage(1);
+    setSearch("");            // 입력 필드 초기화
+    setSearchKeyword("");     // 검색 키워드 초기화 → 검색 조건 제거
   }
-  
 
-  // keyword로 검색
-  const handleSearch = (e) => {
+  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      setSearchKeyword(search.trim()); // ✅ 검색어 업데이트
-      fetchOrdersByKeyword();
+      setCurrentPage(1);
+      setSearchKeyword(search.trim());
     }
   };
 
-  // ✅ API 호출 함수
-  const fetchOrdersByKeyword = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get(`http://localhost:8080/api/staff/orders?keyword=${searchKeyword}`, {
-        withCredentials: true,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      setOrders(response.data.orderList.content);
-      setTotalElements(response.data.orderList.totalElements);
-      setTotalPages(response.data.orderList.totalPages);
-      setStatuses(response.data.statusCounts);
-    } catch (err) {
-      setError("Error fetching data: " + err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  // useEffect로 검색어 변경 시 자동 호출
-  useEffect(() => {
-    if (searchKeyword) fetchOrdersByKeyword();
-  }, [searchKeyword]);
-
-
-  // 초기 셋팅
-  useEffect(() => {
-    axios.get(`http://localhost:8080/api/staff/orders?page=${currentPage-1}&size=10`, {
-      withCredentials: true,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    })
-    .then(response => {
-  
-      setOrders(response.data.orderList.content);
-      setTotalElements(response.data.orderList.totalElements);
-      setTotalPages(response.data.orderList.totalPages);
-      setStatuses(response.data.statusCounts);
-      setLoading(false);
-    })
-    .catch(err => {
-      setError("Error fetching data: " + err.message);
-      setLoading(false);
-    });
-  }, [currentPage]);
-
-
-  const handlePageChange = (page) => {
+  const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
 
-  const paginationButtons = [];
-  for (let i = 1; i <= totalPages; i++) {
-    paginationButtons.push(
-      <button 
-        key={i} 
-        onClick={() => handlePageChange(i)} 
-        className={`px-3 py-1 rounded-3xl ${currentPage === i ? "bg-[#8E5927] text-white" : ""}`}
-      >
-        {i}
-      </button>
-    );
-  }
-
-
-  const updateOrder = (updatedOrder) => {
-    setSelectedOrder(updatedOrder); 
-    console.log("Updated Order:", updatedOrder);
+  const updateOrder = (updatedOrder: Order) => {
+    setSelectedOrder(updatedOrder);
   };
 
-  const updateOrderStatus = async (id, newStatus) => {
-    if (newStatus !== "completed" && newStatus !== "decline" && newStatus !== "complete_decline") {
+  const updateOrderStatus = async (id: string, newStatus: string) => {
+    if (!["completed", "decline", "complete_decline"].includes(newStatus)) {
       console.error("Invalid status");
       return;
     }
 
     try {
-      const response = await axios.put(
-        `http://localhost:8080/api/staff/orders/updateStatus/${id}?status=${newStatus}`,
-        {}, // 요청 본문이 필요 없는 경우 빈 객체 전달
-        { withCredentials: true }
+      await api.put(
+        `/api/staff/orders/updateStatus/${id}?status=${newStatus}`,
+        {}
       );
-
-      console.log("Order updated:", response.data);
-      window.location.reload(); // 상태 업데이트 후 페이지 리로드
+      window.location.reload();
     } catch (error) {
       console.error("Error updating order status:", error);
-      alert("Failed to update order status."); // 사용자에게 알림
+      alert("Failed to update order status.");
     }
   };
+
   return (
     <>
       <div className="bg-[#C3E2C6]">
-      <StaffPageBanner title="Order History" />
-      <div className="max-w-6xl mx-auto overflow-hidden py-16">
-        <div className="flex flex-col lg:flex-row justify-between items-end mb-4">
-      <div className="flex">
-        {statuses.map((item, index) => (
-          <div 
-            key={index}
-            className={`ml-8 pb-3 cursor-pointer border-b-4 ${
-              selectedStatus === item.status ? "border-[#AD343E] text-[#AD343E]" : "border-transparent"
-            }`} 
-            onClick={() => searchByStatus(`${item.status}`)}
-          >
-            {item.status}
-            <span className={`inline-block text-center align-middle rounded-[7.5px] ml-3 w-8 h-8 ${
-              selectedStatus === item.status ? "bg-[#AD343E]" : "bg-[#878787]"
-            } text-white font-semibold`}>
-              {item.count}
-            </span>
+        <StaffPageBanner title="Order History" />
+        <div className="max-w-6xl mx-auto overflow-hidden py-16 px-2">
+          <div className="flex flex-col lg:flex-row justify-between items-center md:items-end mb-6">
+            <div className="flex mb-2 gap-4">
+              {statuses.map((item, index) => (
+                <StaffOrderStatus item={item} index={index} selectedStatus={selectedStatus} searchByStatus={searchByStatus}/>
+              ))}
+            </div>
+
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onKeyDown={handleSearch}
+              placeholder="Search"
+              className="w-full sm:w-[400px] px-2 py-4 border rounded-[30px] bg-white border-[rgba(18,18,18,0.08)] drop-shadow-sm"
+            />
           </div>
-        ))}
-        </div>
 
+          {loading && <div>Loading...</div>}
+          {error && <div>{error}</div>}
+          <div className="hidden md:flex w-full border-[#525252] flex border-t border-b my-3 font-bold text-base py-2">
+            <div className="w-[20%] text-center">Order No.</div>
+            <div className="w-[20%] text-center">E-mail</div>
+            <div className="w-[20%] text-center">Product</div>
+            <div className="w-[20%] text-center">Pick Up Time</div>
+            <div className="w-[20%] text-center">Order Status</div>
+          </div>
 
-          {/* ✅ 검색 입력창 */}
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            onKeyDown={handleSearch} // ✅ 엔터 키 이벤트 추가
-            placeholder="Search"
-            className="min-w-[400px] px-2 py-4 border rounded-[30px] bg-white border-[rgba(18,18,18,0.08)] drop-shadow-sm"
+          <div className="w-full border-collapse">
+            {orders.length > 0 ? (
+              orders.map((order) => (
+                <StaffOrderRow 
+                  key={order.oid}  // key prop 추가
+                  order={order} 
+                  setIsOpen={setIsOpen} 
+                  setSelectedOrder={setSelectedOrder} 
+                  formatTime24To12={formatTime24To12} 
+                  formatDate={formatDate}
+                  updateOrderStatus={() => updateOrderStatus(order.oid.toString(), "completed")}
+                />
+              ))
+            ) : (
+              <div className="w-full text-center py-4 text-gray-500">No data</div>
+            )}
+          </div>
+
+          <Pagination 
+            currentPage={currentPage} 
+            totalPages={totalPages} 
+            onPageChange={handlePageChange} 
           />
         </div>
-
-        {loading && <div>Loading...</div>}
-        {error && <div>{error}</div>}
-
-        <div className="w-full border-[#525252] flex border-t border-b my-3 font-bold text-base py-2">
-          <div className="w-[15%] text-center">Order No.</div>
-          <div className="w-[30%] text-center">E-mail</div>
-          <div className="w-[20%] text-center">Product</div>
-          <div className="w-[20%] text-center">Pick Up Time</div>
-          <div className="w-[15%] text-center">Order Status</div>
-        </div>
-
-        <div className="w-full border-collapse">
-          {orders.map(order => (
-            <div 
-              key={order.oid} 
-              className="flex text-center font-medium bg-white mb-6 py-[12.75px] rounded-[7.5px] "
-              >
-              <div className="flex justify-center items-center w-[15%] border-r border-r-[#52525280] border-r-[1.5px] min-h-[61.5px]">#{order.oid}</div>
-              <div className="flex justify-center items-center w-[30%] border-r border-r-[#52525280] border-r-[1.5px]"
-                            onClick={() => {
-                              setIsOpen(true);
-                              setSelectedOrder(order);
-                            }}>{order.email}</div>
-              <div className="flex justify-center items-center w-[20%] border-r border-r-[#52525280] border-r-[1.5px]">{order.platterName}</div>
-              <div className="flex justify-center items-center w-[20%] border-r border-r-[#52525280] border-r-[1.5px]">{formatTime24To12(new Date(order.time))} , {formatDate(new Date(order.date))}</div>
-              <div className={`flex justify-center items-center w-[15%] ${order.status === "decline" ? "text-red-500" : ""}`}>
-                {order.status === "completed" ? "completed" : order.status === 'decline'? 'decline':
-                 <><button className="bg-green-600 p-1 rounded-sm"
-                            onClick={()=>{
-                             updateOrderStatus(order.oid,'completed')
-                            }}>Complete</button>
-                 <button className="bg-red-700 p-1 rounded-sm"
-                          onClick={()=>{
-                           updateOrderStatus(order.oid,'decline')
-                          }}
-                          >Decline</button></>}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className="flex space-x-4 justify-center">{paginationButtons}</div>
       </div>
-    </div>
-    <StaffOrderModal isOpen={isOpen} setIsOpen={setIsOpen} order={selectedOrder} updateOrder={updateOrder}/>
+
+      <StaffOrderModal
+        isOpen={isOpen}
+        setIsOpen={setIsOpen}
+        order={selectedOrder as Order}
+        updateOrder={updateOrder}
+      />
     </>
   );
-}
+};
 
 export default StaffOrderHistory;

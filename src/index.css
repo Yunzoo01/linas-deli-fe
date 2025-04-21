@@ -24,6 +24,7 @@
 /* 기본 폰트 적용 */
 body {
   font-family: 'Pretendard', "Poppins", "sans-serif";
+  font-display: swap; /* 웹폰트가 로드되기 전에 기본 폰트를 사용 */
 }
 
 .custom-dashed-border {

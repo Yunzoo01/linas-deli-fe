@@ -1,45 +1,43 @@
-import React, { useState } from "react";
-import StaffPageBanner from "../../../components/staff/StaffPageBanner";
+import { useState } from "react";
+import StaffPageBanner from "@/components/staff/StaffPageBanner";
 
 const StaffUpdateMenuForm = () => {
-  const [uploadedImage, setUploadedImage] = useState(null);
-  const [previewImageUrl, setPreviewImageUrl] = useState(null);
-  const [uploadedIngredientsImage, setUploadedIngredientsImage] = useState(null);
-  const [previewIngredientsImageUrl, setPreviewIngredientsImageUrl] = useState(null);
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+  const [previewIngredientsImageUrl, setPreviewIngredientsImageUrl] = useState<string | null>(null);
   const [glutenFreeChecked, setGlutenFreeChecked] = useState(false);
   const [lactoseFreeChecked, setLactoseFreeChecked] = useState(false);
 
-  const handleImageUpload = (event) => {
-    const file = event.target.files[0];
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]; // Optional chaining 사용
     if (file) {
-      setUploadedImage(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPreviewImageUrl(reader.result);
+        if (reader.result) {
+          setPreviewImageUrl(reader.result as string); // string 타입으로 강제 변환
+        }
       };
       reader.readAsDataURL(file);
     } else {
-      setUploadedImage(null);
       setPreviewImageUrl(null);
     }
   };
 
-  const handleIngredientsImageUpload = (event) => {
-    const file = event.target.files[0];
+  const handleIngredientsImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]; // Optional chaining 사용
     if (file) {
-      setUploadedIngredientsImage(file);
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPreviewIngredientsImageUrl(reader.result);
+        if (reader.result) {
+          setPreviewIngredientsImageUrl(reader.result as string); // string 타입으로 강제 변환
+        }
       };
       reader.readAsDataURL(file);
     } else {
-      setUploadedIngredientsImage(null);
       setPreviewIngredientsImageUrl(null);
     }
   };
 
-  const handleCheckboxChange = (id) => {
+  const handleCheckboxChange = (id: string) => {
     switch (id) {
       case "glutenFree":
         setGlutenFreeChecked(!glutenFreeChecked);
@@ -51,6 +49,7 @@ const StaffUpdateMenuForm = () => {
         break;
     }
   };
+
   return (
     <>
       <StaffPageBanner title="Menu" />
@@ -181,8 +180,8 @@ const StaffUpdateMenuForm = () => {
             </div>
           </div>
 
-{/* Row 4: Ingredients and Allergy Mark */}
-<div className="flex gap-6 mb-6 items-start justify-between">
+          {/* Row 4: Ingredients and Allergy Mark */}
+          <div className="flex gap-6 mb-6 items-start justify-between">
             <div>
               <label className="block text-sm font-semibold mb-1">Ingredients</label>
               <div className="w-36 h-28 bg-gray-200 rounded mb-2 flex items-center justify-center">
@@ -252,7 +251,7 @@ const StaffUpdateMenuForm = () => {
             <label className="block text-sm font-semibold mb-1">Product Description</label>
             <textarea
               className="w-full border border-gray-300 px-2 py-1 rounded-md text-sm"
-              rows="3"
+              rows={3} // '3'을 숫자로 변경
             ></textarea>
           </div>
 
@@ -261,7 +260,7 @@ const StaffUpdateMenuForm = () => {
             <label className="block text-sm font-semibold mb-1">Serving suggestion</label>
             <textarea
               className="w-full border border-gray-300 px-2 py-1 rounded-md text-sm"
-              rows="2"
+              rows={2} // '2'를 숫자로 변경
             ></textarea>
           </div>
 

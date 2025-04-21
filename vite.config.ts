@@ -8,4 +8,9 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  resolve: {
+    alias: {
+      '@': '/src', // '@'를 src 디렉토리로 매핑
+    },
+  },
 })

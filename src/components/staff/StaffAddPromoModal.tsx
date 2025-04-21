@@ -1,5 +1,5 @@
+import api from "@/api/axios";
 import React from "react";
-import axios from "axios";
 
 interface StaffAddPromoModalProps {
   isOpen: boolean;
@@ -16,11 +16,7 @@ const StaffAddPromoModal: React.FC<StaffAddPromoModalProps> = ({ isOpen, onClose
     const formData = new FormData(form);
 
     try {
-      await axios.post("http://localhost:8080/api/staff/promotions", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      await api.post("/api/staff/promotions", formData);
       alert("Promotion added!");
       onClose();
       onSuccess(); // 목록 새로고침
