@@ -54,8 +54,7 @@ const StaffNavbar = () => {
         <ul className="hidden sm:flex space-x-6">
           <li><Link to="/staff/menu" className="text-gray-700 hover:text-gray-900 cursor-pointer">Menu</Link></li>
           <li><Link to="/staff/order" className="text-gray-700 hover:text-gray-900 cursor-pointer">Order</Link></li>
-          <li><Link to="/staff/profile" className="text-gray-700 hover:text-gray-900 cursor-pointer">Profile</Link></li>
-          <li><Link to="/staff/promotion" className="text-gray-700 hover:text-gray-900 cursor-pointer">Promotion</Link></li>
+          <li><Link to="/staff/mypage" className="text-gray-700 hover:text-gray-900 cursor-pointer">Mypage</Link></li>
 
           {isLoggedIn ? (
             <li onClick={handleLogout} className="text-gray-700 hover:text-gray-900 cursor-pointer">Logout</li>
@@ -78,8 +77,7 @@ const StaffNavbar = () => {
           </li>
           <li><Link to="/staff/menu" className="text-white hover:text-gray-300 cursor-pointer" onClick={() => setIsOpen(false)}>Menu</Link></li>
           <li><Link to="/staff/order" className="text-white hover:text-gray-300 cursor-pointer" onClick={() => setIsOpen(false)}>Order</Link></li>
-          <li><Link to="/staff/profile" className="text-white hover:text-gray-300 cursor-pointer" onClick={() => setIsOpen(false)}>Profile</Link></li>
-          <li><Link to="/staff/promotion" className="text-white hover:text-gray-300 cursor-pointer" onClick={() => setIsOpen(false)}>Promotion</Link></li>
+          <li><Link to="/staff/mypage" className="text-white hover:text-gray-300 cursor-pointer" onClick={() => setIsOpen(false)}>Mypage</Link></li>
 
           {isLoggedIn ? (
             <li onClick={handleLogout} className="text-white hover:text-gray-300 cursor-pointer">Logout</li>
