@@ -57,3 +57,53 @@ export interface Order {
   allergy?: string;       // 알레르기 정보
   message?: string;       // 메시지
 }
+
+
+export interface ProductListDTO {
+  pid: number;
+  productName: string;
+  productImageUrl: string;
+  inStock: boolean;
+  plu: string;
+}
+
+export interface ProductFormResponseDTO {
+  pid: number;
+  categoryId: number;
+  productName: string;
+  supplierId: number;
+  priceType: string;
+  supplierPrice: number;
+  salePrice: number;
+  plu: number;
+  animalId: number;
+  pasteurized: boolean;
+  originId: number;
+  allergies: ("G" | "L")[]; // AllergyType은 "G" | "L" enum으로 가정
+  productImageName: string;
+  productImageUrl: string;
+  ingredientsImageName: string;
+  ingredientsImageUrl: string;
+  description: string;
+  suggestion: string;
+}
+
+export interface SupplierDTO {
+  sid: number;
+  supplierName: string;
+}
+
+export interface CategoryDTO {
+  id: number; // categoryId ❌
+  categoryName: string;
+}
+
+export interface AnimalDTO {
+  animalId: number;        // ⛔ 'id'가 아니라 'animalId'
+  animalName: string;
+}
+
+export interface CountryDTO {
+  countryId: number;      // ✅ 'id' ❌ → 'countryId' ⭕
+  countryName: string;
+}

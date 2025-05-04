@@ -1,35 +1,124 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import api from "@/api/axios";
 import StaffPageBanner from "@/components/staff/StaffPageBanner";
+import { useSearchParams } from "react-router-dom";
+import { ProductFormResponseDTO, SupplierDTO, CategoryDTO, AnimalDTO, CountryDTO } from "@/type";
 
-const StaffAddMenuForm = () => {
-  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
-  const [previewIngredientsImageUrl, setPreviewIngredientsImageUrl] = useState<string | null>(null);
+const StaffUpdateMenuForm = () => {
+  const [searchParams] = useSearchParams();
+  const id = searchParams.get("id");
+
+  const [formData, setFormData] = useState<ProductFormResponseDTO | null>(null);
+  const [suppliers, setSuppliers] = useState<SupplierDTO[]>([]);
+  const [categories, setCategories] = useState<CategoryDTO[]>([]);
+  const [animals, setAnimals] = useState<AnimalDTO[]>([]);
+  const [countries, setCountries] = useState<CountryDTO[]>([]);
+
+  const [productName, setProductName] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+  const [selectedSupplierId, setSelectedSupplierId] = useState<number | null>(null);
+  const [selectedAnimalId, setSelectedAnimalId] = useState<number | null>(null);
+  const [selectedCountryId, setSelectedCountryId] = useState<number | null>(null);
+
+  const [priceType, setPriceType] = useState("Whole Wheel");
+  const [supplierPrice, setSupplierPrice] = useState("");
+  const [salePrice, setSalePrice] = useState("");
+  const [plu, setPlu] = useState("");
+  const [pasteurized, setPasteurized] = useState(false);
+
   const [glutenFreeChecked, setGlutenFreeChecked] = useState(false);
   const [lactoseFreeChecked, setLactoseFreeChecked] = useState(false);
+
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+  const [previewIngredientsImageUrl, setPreviewIngredientsImageUrl] = useState<string | null>(null);
+
+  const [productImageFile, setProductImageFile] = useState<File | null>(null);
+  const [ingredientsImageFile, setIngredientsImageFile] = useState<File | null>(null);
+
+
+  const [description, setDescription] = useState("");
+  const [suggestion, setSuggestion] = useState("");
+
+  useEffect(() => {
+    if (id) fetchProductForm(Number(id));
+  }, [id]);
+
+  useEffect(() => {
+    if (formData) {
+      setProductName(formData.productName);
+      setSelectedCategoryId(formData.categoryId);
+      setSelectedSupplierId(formData.supplierId);
+      setSelectedAnimalId(formData.animalId);
+      setSelectedCountryId(formData.originId);
+      setPriceType(formData.priceType);
+      setSupplierPrice(formData.supplierPrice.toString());
+      setSalePrice(formData.salePrice.toString());
+      setPlu(formData.plu.toString());
+      setPasteurized(formData.pasteurized);
+      setGlutenFreeChecked(formData.allergies.includes("G"));
+      setLactoseFreeChecked(formData.allergies.includes("L"));
+      setPreviewImageUrl(formData.productImageUrl);
+      setPreviewIngredientsImageUrl(formData.ingredientsImageUrl);
+      setDescription(formData.description);
+      setSuggestion(formData.suggestion);
+    }
+  }, [formData]);
+
+  const fetchProductForm = async (productId: number) => {
+    try {
+      const res = await api.get(`/api/staff/products/${productId}`);
+      setFormData(res.data);
+    } catch (err) {
+      console.error("❌ Failed to fetch product:", err);
+    }
+  };
+
+  const fetchInitialData = async () => {
+    try {
+      const [supplierRes, categoryRes, animalRes, countryRes] = await Promise.all([
+        api.get("/api/staff/products/suppliers"),
+        api.get("/api/staff/products/categories"),
+        api.get("/api/staff/products/animals"),
+        api.get("/api/staff/products/origins"),
+      ]);
+      setSuppliers(supplierRes.data);
+      setCategories(categoryRes.data);
+      setAnimals(animalRes.data);
+      setCountries(countryRes.data);
+    } catch (err) {
+      console.error("❌ Failed to fetch init data:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchInitialData();
+  }, []);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      setProductImageFile(file); // 파일 저장
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPreviewImageUrl(reader.result as string);
+        if (reader.result) {
+          setPreviewImageUrl(reader.result as string);
+        }
       };
       reader.readAsDataURL(file);
-    } else {
-      setPreviewImageUrl(null);
     }
   };
 
   const handleIngredientsImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      setIngredientsImageFile(file); // 파일 저장
       const reader = new FileReader();
       reader.onloadend = () => {
-        setPreviewIngredientsImageUrl(reader.result as string);
+        if (reader.result) {
+          setPreviewIngredientsImageUrl(reader.result as string);
+        }
       };
       reader.readAsDataURL(file);
-    } else {
-      setPreviewIngredientsImageUrl(null);
     }
   };
 
@@ -41,8 +130,47 @@ const StaffAddMenuForm = () => {
       case "lactoseFree":
         setLactoseFreeChecked(!lactoseFreeChecked);
         break;
-      default:
-        break;
+    }
+  };
+
+  const handleSave = async () => {
+    const pid = searchParams.get("id");
+    if (!pid) return;
+  
+    const form = new FormData();
+    form.append("categoryId", String(selectedCategoryId!));
+    form.append("productName", productName);
+    form.append("supplierId", String(selectedSupplierId!));
+    form.append("priceType", priceType);
+    form.append("supplierPrice", supplierPrice);
+    form.append("salePrice", salePrice);
+    form.append("plu", plu);
+    form.append("animalId", String(selectedAnimalId!));
+    form.append("pasteurized", String(pasteurized));
+    form.append("originId", String(selectedCountryId!));
+    form.append("description", description);
+    form.append("suggestion", suggestion);
+
+    const allergyList = [];
+    if (glutenFreeChecked) allergyList.push("G");
+    if (lactoseFreeChecked) allergyList.push("L");
+    form.append("allergies", JSON.stringify(allergyList));
+
+    if (productImageFile) form.append("productImage", productImageFile);
+    if (ingredientsImageFile) form.append("ingredientsImage", ingredientsImageFile);
+
+    // ✅ 여기 추가하세요!
+    for (const [key, value] of (form as any).entries()) {
+      console.log(`📦 ${key}:`, value);
+    }
+
+    try {
+     await api.post("/api/staff/products", form, {
+  headers: { "Content-Type": "multipart/form-data" },
+});
+      alert("✅ Product updated successfully!");
+    } catch (err) {
+      console.error("❌ Failed to update product:", err);
     }
   };
 
@@ -51,8 +179,29 @@ const StaffAddMenuForm = () => {
       <StaffPageBanner title="Menu" />
       <form className="bg-[#C3E2C6] min-h-screen py-10 px-4 flex justify-center">
         <div className="bg-white w-full max-w-4xl p-8 rounded-lg shadow-md">
-          {/* Form content */}
-          {/* Image Upload */}
+          <div className="flex mb-10">
+            <h1 className="text-2xl font-bold mr-3">Create Post</h1>
+            <div className="flex">
+
+              <select
+                value={selectedCategoryId !== null ? String(selectedCategoryId) : ""}
+                onChange={(e) => {
+                  const id = e.target.value === "" ? null : Number(e.target.value);
+                  setSelectedCategoryId(id);
+                  console.log("✔ selectedCategoryId:", id);
+                }}
+              >
+                <option value="">Select Category</option>
+                {categories.map((category) => (
+                  <option key={category.id} value={String(category.id)}>
+                    {category.categoryName}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Row 1: Image, Product Name, Supplier */}
           <div className="flex gap-6 mb-4">
             <div className="w-36 h-36 rounded flex flex-col items-start justify-center">
               {previewImageUrl ? (
@@ -80,10 +229,149 @@ const StaffAddMenuForm = () => {
                 image upload
               </label>
             </div>
+            <div className="flex-1 grid grid-cols-2 gap-4 items-center">
+              <input
+                type="text"
+                className="w-full border border-gray-300 px-2 py-1 rounded-md text-sm"
+                value={productName}
+                onChange={(e) => setProductName(e.target.value)}
+              />
+              <div>
+                <label className="block text-sm font-semibold mb-1">Supplier</label>
+                <select
+                  value={selectedSupplierId !== null ? String(selectedSupplierId) : ""}
+                  onChange={(e) => {
+                    const id = e.target.value === "" ? null : Number(e.target.value);
+                    setSelectedSupplierId(id);
+                    console.log("✔ selectedSupplierId:", id);
+                  }}
+                >
+                  <option value="">Select Supplier</option>
+                  {suppliers.map((supplier) => (
+                    <option key={supplier.sid} value={String(supplier.sid)}>
+                      {supplier.supplierName}
+                    </option>
+                  ))}
+                </select>
+
+              </div>
+            </div>
           </div>
 
-          {/* Ingredients Image Upload */}
-          <div className="flex gap-6 mb-4 items-start justify-between">
+          {/* Row 2: Price Type */}
+          <div className="flex mb-4 items-center">
+            <label className="block text-sm font-semibold mb-1 mr-3">Price Type</label>
+            <div className="flex gap-3">
+              <div className="flex gap-3">
+                <label className="text-sm">
+                  <input
+                    type="radio"
+                    name="priceType"
+                    value="Whole Wheel"
+                    checked={priceType === "Whole Wheel"}
+                    onChange={() => setPriceType("Whole Wheel")}
+                    className="mr-1"
+                  />
+                  Whole Wheel
+                </label>
+                <label className="text-sm">
+                  <input
+                    type="radio"
+                    name="priceType"
+                    value="Pre-Pack"
+                    checked={priceType === "Pre-Pack"}
+                    onChange={() => setPriceType("Pre-Pack")}
+                    className="mr-1"
+                  />
+                  Pre-Pack
+                </label>
+              </div>
+            </div>
+          </div>
+
+          {/* Row 3: Detailed Information */}
+          <div className="mb-4 flex flex-col lg:flex-row">
+            <div className="flex-1 mr-4">
+              <div className="flex flex-col md:flex-row item-start md:items-center mb-2">
+                <label className="text-sm mr-3 w-[75px]">Cost / Kg</label>
+                <input
+                  type="text"
+                  className="w-full lg:w-[200px] border border-gray-300 px-2 py-1 rounded-md text-sm"
+                  value={supplierPrice}
+                  onChange={(e) => setSupplierPrice(e.target.value)}
+                />
+              </div>
+              <div className="flex flex-col md:flex-row item-start md:items-center mb-2">
+                <label className="text-sm mr-3 w-[75px]">Sale price</label>
+                <input
+                  type="text"
+                  className="w-full lg:w-[200px] border border-gray-300 px-2 py-1 rounded-md text-sm"
+                  value={salePrice}
+                  onChange={(e) => setSalePrice(e.target.value)}
+                />
+              </div>
+              <div className="flex flex-col md:flex-row item-start md:items-center mb-2">
+                <label className="text-sm mr-3 w-[75px]">PLU</label>
+                <input
+                  type="text"
+                  className="w-full lg:w-[200px] border border-gray-300 px-2 py-1 rounded-md text-sm"
+                  value={plu}
+                  onChange={(e) => setPlu(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-2">
+              <div>
+                <label className="block text-sm font-semibold mb-1">Source Animal</label>
+                <select
+                  value={selectedAnimalId !== null ? String(selectedAnimalId) : ""}
+                  onChange={(e) => {
+                    const id = e.target.value === "" ? null : Number(e.target.value);
+                    setSelectedAnimalId(id);
+                  }}
+                >
+                  <option value="">Select Animal</option>
+                  {animals.map((animal) => (
+                    <option key={animal.animalId} value={String(animal.animalId)}>
+                      {animal.animalName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <label className="text-sm font-semibold">Pasteurized</label>
+                <input
+                  type="checkbox"
+                  checked={pasteurized}
+                  onChange={() => setPasteurized(!pasteurized)}
+                  className="w-4 h-4"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold mb-1">Country of Origin</label>
+                <select
+                  value={selectedCountryId !== null ? String(selectedCountryId) : ""}
+                  onChange={(e) => {
+                    const id = e.target.value === "" ? null : Number(e.target.value);
+                    console.log("✔ selectedCountryId:", id); // 확인 로그
+                    setSelectedCountryId(id);
+                  }}
+                >
+                  <option value="">Select Country</option>
+                  {countries.map((country) => (
+                    <option key={country.countryId} value={String(country.countryId)}>
+                      {country.countryName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+
+          {/* Row 4: Ingredients and Allergy Mark */}
+          <div className="flex gap-6 mb-6 items-start justify-between">
+            {/* Ingredients 이미지 업로드 */}
             <div>
               <label className="block text-sm font-semibold mb-1">Ingredients</label>
               <div className="w-36 h-28 bg-gray-200 rounded mb-2 flex items-center justify-center">
@@ -113,52 +401,72 @@ const StaffAddMenuForm = () => {
                 image upload
               </label>
             </div>
+
+            {/* 알러지 체크박스 */}
+            <div className="flex flex-col gap-2 items-end">
+              <p className="font-semibold text-sm">Allergy Mark (Option)</p>
+              <div className="flex gap-3 items-center">
+                <label className="flex items-center">
+                  <img
+                    src="/Icon/allergy/icon_glutenfree.png"
+                    alt="Gluten Free"
+                    className="w-6 h-6 mr-2"
+                  />
+                  <input
+                    type="checkbox"
+                    className="form-checkbox rounded-full h-5 w-5 text-green-500"
+                    id="glutenFree"
+                    checked={glutenFreeChecked}
+                    onChange={() => handleCheckboxChange("glutenFree")}
+                  />
+                </label>
+                <label className="flex items-center">
+                  <img
+                    src="/Icon/allergy/icon_lactosefree.png"
+                    alt="Lactose Free"
+                    className="w-6 h-6 mr-2"
+                  />
+                  <input
+                    type="checkbox"
+                    className="form-checkbox rounded-full h-5 w-5 text-purple-500"
+                    id="lactoseFree"
+                    checked={lactoseFreeChecked}
+                    onChange={() => handleCheckboxChange("lactoseFree")}
+                  />
+                </label>
+              </div>
+            </div>
           </div>
 
-          {/* Allergy Checkbox */}
-          <div className="flex gap-3 items-center">
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                className="form-checkbox rounded-full h-5 w-5 text-green-500"
-                id="glutenFree"
-                checked={glutenFreeChecked}
-                onChange={() => handleCheckboxChange("glutenFree")}
-              />
-              Gluten Free
-            </label>
-            <label className="flex items-center">
-              <input
-                type="checkbox"
-                className="form-checkbox rounded-full h-5 w-5 text-purple-500"
-                id="lactoseFree"
-                checked={lactoseFreeChecked}
-                onChange={() => handleCheckboxChange("lactoseFree")}
-              />
-              Lactose Free
-            </label>
-          </div>
-
-          {/* Product Description */}
+          {/* Row 5: Product Description */}
           <div className="mb-4">
             <label className="block text-sm font-semibold mb-1">Product Description</label>
             <textarea
               className="w-full border border-gray-300 px-2 py-1 rounded-md text-sm"
               rows={3}
-            ></textarea>
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
           </div>
 
-          {/* Serving Suggestion */}
+          {/* Row 6: Serving Suggestion */}
           <div className="mb-6">
             <label className="block text-sm font-semibold mb-1">Serving suggestion</label>
             <textarea
               className="w-full border border-gray-300 px-2 py-1 rounded-md text-sm"
               rows={2}
-            ></textarea>
+              value={suggestion}
+              onChange={(e) => setSuggestion(e.target.value)}
+            />
           </div>
 
           <div className="flex justify-end">
-            <button className="bg-[#AD343E] text-white px-4 py-2 rounded-md text-sm">
+            <button
+              onClick={handleSave}
+              type="button"
+              className="bg-[#AD343E] text-white px-4 py-2 rounded-md text-sm"
+              disabled={!formData}
+            >
               Save
             </button>
           </div>
@@ -168,4 +476,4 @@ const StaffAddMenuForm = () => {
   );
 };
 
-export default StaffAddMenuForm;
+export default StaffUpdateMenuForm;
