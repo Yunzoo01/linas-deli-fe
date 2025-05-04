@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import StaffPageBanner from "@/components/staff/StaffPageBanner";
 import StaffPromoModal from "@/components/staff/StaffPromoModal";
 import StaffAddPromoModal from "@/components/staff/StaffAddPromoModal";
 import StaffEditPromoModal from "@/components/staff/StaffEditPromoModal";
@@ -35,7 +34,11 @@ const PromotionList = () => {
     api
       .get(`/api/staff/promotions?${params.toString()}`)
       .then((res) => {
-        setPromotions(res.data.content);
+        const sortedPromotions = res.data.content.sort(
+          (a: Promotion, b: Promotion) =>
+            new Date(b.startDate).getTime() - new Date(a.startDate).getTime()
+        );
+        setPromotions(sortedPromotions);
         setTotalPages(res.data.totalPages);
         setLoading(false);
       })
@@ -87,7 +90,6 @@ const PromotionList = () => {
 
   return (
     <div className="bg-[#C3E2C6] min-h-screen">
-      <StaffPageBanner title="Promotion" />
       <div className="max-w-6xl mx-auto mt-8 p-4">
         <h2 className="text-2xl font-bold mb-4">Promotions</h2>
         <div className="flex justify-end mb-4">
