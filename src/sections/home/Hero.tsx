@@ -51,14 +51,14 @@ const Hero = () => {
 
             {/* 텍스트 (고정된 상태) */}
             <div className="absolute inset-0 z-10 flex flex-col justify-center items-center text-white gap-2 lg:gap-5">
-                <h1 className="text-4xl font-bold mt-10 lg:mt-0 lg:text-8xl">Lina’s Deli</h1>
-                <button className="lg:hidden mt-4 px-6 py-2 bg-white text-sm lg:text- text-black rounded-lg font-medium">
+                <h1 className="text-5xl font-bold mt-10 lg:mt-0 lg:text-6xl lg:font-semobold text-shadow-custom">Lina’s Deli</h1>
+                <button className="lg:hidden mt-4 px-6 py-2 bg-white text-sm text-black rounded-lg font-medium">
                     <Link to="/order">ORDER</Link>
                 </button>
-                <p className="mt-2 text-base lg:text-3xl text-center px-10 lg:px-30">
+                <p className="mt-5 text-lg font-normal lg:text-lg text-center px-10 lg:px-30">
                     At Lina’s, everyone is family, and you’ll find the friendliest service in the city.
                 </p>
-                <button className="hidden lg:block mt-4 px-6 py-2 bg-white text-sm lg:text-3xl text-black rounded-lg font-medium">
+                <button className="hidden lg:block mt-4 px-6 py-2 bg-white text-sm lg:text-lg text-black rounded-sm font-medium w-[185px] h-[47px]">
                     <Link to="/order">ORDER</Link>
                 </button>
             </div>

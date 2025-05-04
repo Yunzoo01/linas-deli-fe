@@ -28,6 +28,7 @@ const StaffLogin = () => {
       );
 
       console.log(response);
+      console.log(import.meta.env.VITE_API_BASE_URL);
 
       if (response.status === 200 && response.data.user) {
         const { user } = response.data;

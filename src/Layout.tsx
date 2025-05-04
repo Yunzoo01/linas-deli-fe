@@ -46,7 +46,7 @@ const Layout = () => {
         ""
       )}
 
-      <div className={`pt-0 ${!isLoginPage ? "sm:pt-20" : ""} text-base`}> {/* 로그인 페이지일 경우 sm:pt-20을 제외 */}
+      <div className={`pt-20 ${!isLoginPage ? "sm:pt-0" : ""} text-base`}> {/* 로그인 페이지일 경우 sm:pt-20을 제외 */}
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/menu" element={<Menu />} />

@@ -16,7 +16,14 @@ const StaffAddPromoModal: React.FC<StaffAddPromoModalProps> = ({ isOpen, onClose
     const formData = new FormData(form);
 
     try {
-      await api.post("/api/staff/promotions", formData);
+      await api.post("/api/staff/promotions", formData, {
+        withCredentials: true, 
+        headers: {
+          // Axios automatically sets this when sending FormData, but you can explicitly add it for clarity
+          "Content-Type": "multipart/form-data",
+        },
+
+      });
       alert("Promotion added!");
       onClose();
       onSuccess(); // 목록 새로고침
