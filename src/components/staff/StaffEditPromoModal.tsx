@@ -38,7 +38,14 @@ const StaffEditPromoModal: React.FC<Props> = ({ isOpen, onClose, promotion, onSu
     if (image) formData.append("image", image);
 
     try {
-      await api.put(`/api/staff/promotions/${promotion.promotionId}`, formData);
+      await api.put(`/api/staff/promotions/${promotion.promotionId}`, formData, {
+        withCredentials: true, 
+        headers: {
+          // Axios automatically sets this when sending FormData, but you can explicitly add it for clarity
+          "Content-Type": "multipart/form-data",
+        },
+
+      });
       alert("Promotion updated!");
       onClose();
       onSuccess();
@@ -65,7 +72,7 @@ const StaffEditPromoModal: React.FC<Props> = ({ isOpen, onClose, promotion, onSu
             {/* Form */}
             <form onSubmit={handleUpdate} className="p-6 space-y-4">
               <div>
-                <label className="block mb-1">Title</label>
+                <label className="block mb-1">Title1111</label>
                 <input
                   type="text"
                   name="promotionTitle"

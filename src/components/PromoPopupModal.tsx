@@ -30,7 +30,7 @@ const PromoPopupModal = ({ promotion, onClose }: Props) => {
               <img
                 src={promotion.promotionImageUrl}
                 alt={promotion.promotionTitle}
-                className="w-full h-64 object-cover"
+                className="w-full h-80 object-cover"
               />
             )}
           </Dialog.Panel>

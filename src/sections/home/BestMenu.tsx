@@ -17,11 +17,11 @@ const BestMenu = () => {
     const [activeTab, setActiveTab] = useState("Popular");
 
     return (
-        <section className="px-3 lg:px-6 py-12 lg:py-20 lg:bg-[#FAF6ED]">
+        <section className="px-3 lg:px-6 py-12 lg:py-30 lg:bg-[#FAF6ED]">
             {/* 제목 & 부제목 */}
             <div className="lg:text-center mb-6 lg:mb-10">
-                <h2 className="lg:text-4xl text-[1.375rem] font-bold px-3">Most popular Menu</h2>
-                <p className="hidden lg:block text-gray-600 text-sm lg:text-lg mt-2">
+                <h2 className="lg:text-4xl text-[1.375rem] font-semibold px-3">Most popular Menu</h2>
+                <p className="hidden lg:block text-gray-600 text-sm lg:text-base mt-4">
                     Here's a list of the most popular menu items that are often in high demand
                 </p>
             </div>
