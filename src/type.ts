@@ -63,8 +63,10 @@ export interface ProductListDTO {
   pid: number;
   productName: string;
   productImageUrl: string;
+  priceType: "W" | "U"; 
   inStock: boolean;
   plu: string;
+  categoryId: number; 
 }
 
 export interface ProductFormResponseDTO {
