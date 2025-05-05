@@ -7,31 +7,40 @@ import SearchBar from "@/components/SearchBar";
 import MenuCategory from "@/components/menu/MenuCategory";
 
 
+
+
 const StaffMenu = () => {
   const navigate = useNavigate();
   const [productDetails, setProductDetails] = useState<ProductListDTO[]>([]);
   const [currentPage, setCurrentPage] = useState(0); // 백엔드는 0부터 시작
   const [totalPages, setTotalPages] = useState(1);
 
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState<number | null>(null);
+
   useEffect(() => {
     fetchProducts();
-  }, [currentPage]);
+  }, [currentPage, searchKeyword, selectedCategory]);
 
   const fetchProducts = async () => {
     try {
+      const adjustedCategoryId =
+        selectedCategory === null || selectedCategory === 0 ? null : selectedCategory;
+  
+  
       const response = await api.get("/api/staff/products", {
         params: {
           page: currentPage,
           size: 10,
+          keyword: searchKeyword,
+          categoryId: adjustedCategoryId,
         },
       });
-
-      console.log("🔥 response.data:", response.data);
-
-      setProductDetails(response.data.productList.content);  // ✅ 고침
-      setTotalPages(response.data.productList.totalPages);   // ✅ 고침
+  
+      setProductDetails(response.data.productList.content);
+      setTotalPages(response.data.productList.totalPages);
     } catch (err) {
-      console.error("Failed to fetch products:", err);
+      console.error("❌ Failed to fetch products:", err);
     }
   };
 
@@ -40,12 +49,12 @@ const StaffMenu = () => {
     setProductDetails((prev) =>
       prev.map((p) => (p.pid === productId ? { ...p, inStock: newValue } : p))
     );
-  
+
     try {
       await api.patch(`/api/staff/products/${productId}/instock`, null, {
         params: { inStock: newValue },
       });
-  
+
       // ✅ fetchProducts()는 굳이 다시 호출하지 말기!
       // 👉 또는 아래처럼 지연 호출도 가능
       // setTimeout(() => fetchProducts(), 300);
@@ -76,17 +85,19 @@ const StaffMenu = () => {
   }, [productDetails]);
 
 
+
+
   return (
     <div className="bg-[#C3E2C6] min-h-screen">
       <StaffPageBanner title="Menu" />
       <div className="flex flex-col lg:flex-row">
-        <MenuCategory />
+        <MenuCategory selected={selectedCategory} onSelect={(categoryId) => setSelectedCategory(categoryId)} />
 
         {/* Main Content */}
         <main className="flex-1 px-2 lg:px-10 py-4 lg:py-8 min-h-lvh ">
           {/* Search + Add */}
           <div className="flex flex-col mb-6">
-            <SearchBar />
+            <SearchBar value={searchKeyword} onChange={(value) => setSearchKeyword(value)} />
             <button
               className="bg-[#A73F3F] hover:bg-[#8f3535] px-6 py-2 text-white rounded-lg w-[82px] ml-auto lg:mr-10 mt-3"
               onClick={handleAddClick}
@@ -105,7 +116,7 @@ const StaffMenu = () => {
 
           {/* Product List */}
           <div className="rounded-lg shadow-sm">
-            {Array.isArray(productDetails) && productDetails.length > 0 ? (
+            {sortedProductList.length > 0 ? (
               sortedProductList.map((product) => (
                 <div
                   key={product.pid}
@@ -114,24 +125,26 @@ const StaffMenu = () => {
                 >
                   <div className="col-span-3">
                     <img
-                      src={product.productImageUrl ?? ""}
+                      src={`${import.meta.env.VITE_API_BASE_URL}${product.productImageUrl ?? ""}`}
                       alt={product.productName ?? ""}
                       className="w-16 h-16 object-cover rounded"
                     />
                   </div>
                   <div className="col-span-5 font-medium">{product.productName}</div>
-                  <div className="col-span-2 font-medium">{product.plu}</div>
+                  <div className="col-span-2 font-medium">
+                    {product.priceType === "U" ? "By Unit" : product.plu}
+                  </div>
                   <div className="col-span-2 text-center">
                     <div className="col-span-2 text-center">
-                    <input
-  type="checkbox"
-  checked={product.inStock}
-  onClick={(e) => e.stopPropagation()} // ✅ 클릭 자체에서 버블링 막기
-  onChange={(e) => {
-    handleToggleInStock(product.pid, e.target.checked);
-  }}
-  className="w-5 h-5 accent-green-600 cursor-pointer"
-/>
+                      <input
+                        type="checkbox"
+                        checked={product.inStock}
+                        onClick={(e) => e.stopPropagation()} // ✅ 클릭 자체에서 버블링 막기
+                        onChange={(e) => {
+                          handleToggleInStock(product.pid, e.target.checked);
+                        }}
+                        className="w-5 h-5 accent-green-600 cursor-pointer"
+                      />
                     </div>
                   </div>
                 </div>

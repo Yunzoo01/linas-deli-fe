@@ -192,7 +192,7 @@ const StaffUpdateMenuForm = () => {
       <form className="bg-[#C3E2C6] min-h-screen py-10 px-4 flex justify-center">
         <div className="bg-white w-full max-w-4xl p-8 rounded-lg shadow-md">
           <div className="flex mb-10">
-            <h1 className="text-2xl font-bold mr-3">Create Post</h1>
+            <h1 className="text-2xl font-bold mr-3">Update Post</h1>
             <div className="flex">
 
               <select
