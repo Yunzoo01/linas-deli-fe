@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import api from "@/api/axios";
 import StaffPageBanner from "@/components/staff/StaffPageBanner";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { ProductFormResponseDTO, SupplierDTO, CategoryDTO, AnimalDTO, CountryDTO } from "@/type";
 
-const StaffUpdateMenuForm = () => {
+const StaffAddMenuForm = () => {
   const [searchParams] = useSearchParams();
   const id = searchParams.get("id");
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState<ProductFormResponseDTO | null>(null);
   const [suppliers, setSuppliers] = useState<SupplierDTO[]>([]);
@@ -20,7 +21,7 @@ const StaffUpdateMenuForm = () => {
   const [selectedAnimalId, setSelectedAnimalId] = useState<number | null>(null);
   const [selectedCountryId, setSelectedCountryId] = useState<number | null>(null);
 
-  const [priceType, setPriceType] = useState("Whole Wheel");
+  const [priceType, setPriceType] = useState<"W" | "U">("W");
   const [supplierPrice, setSupplierPrice] = useState("");
   const [salePrice, setSalePrice] = useState("");
   const [plu, setPlu] = useState("");
@@ -50,7 +51,7 @@ const StaffUpdateMenuForm = () => {
       setSelectedSupplierId(formData.supplierId);
       setSelectedAnimalId(formData.animalId);
       setSelectedCountryId(formData.originId);
-      setPriceType(formData.priceType);
+      setPriceType(formData.priceType as "W" | "U");
       setSupplierPrice(formData.supplierPrice.toString());
       setSalePrice(formData.salePrice.toString());
       setPlu(formData.plu.toString());
@@ -134,9 +135,6 @@ const StaffUpdateMenuForm = () => {
   };
 
   const handleSave = async () => {
-    const pid = searchParams.get("id");
-    if (!pid) return;
-  
     const form = new FormData();
     form.append("categoryId", String(selectedCategoryId!));
     form.append("productName", productName);
@@ -151,26 +149,38 @@ const StaffUpdateMenuForm = () => {
     form.append("description", description);
     form.append("suggestion", suggestion);
 
+
     const allergyList = [];
     if (glutenFreeChecked) allergyList.push("G");
     if (lactoseFreeChecked) allergyList.push("L");
-    form.append("allergies", JSON.stringify(allergyList));
+
+    // ✅ 하나씩 append 해줘야 Spring에서 List<Enum> 파싱 가능
+    for (const allergy of allergyList) {
+      form.append("allergies", allergy);
+    }
 
     if (productImageFile) form.append("productImage", productImageFile);
     if (ingredientsImageFile) form.append("ingredientsImage", ingredientsImageFile);
 
-    // ✅ 여기 추가하세요!
-    for (const [key, value] of (form as any).entries()) {
-      console.log(`📦 ${key}:`, value);
-    }
-
     try {
-     await api.post("/api/staff/products", form, {
-  headers: { "Content-Type": "multipart/form-data" },
-});
-      alert("✅ Product updated successfully!");
+      if (id) {
+        // 수정
+        form.append("pid", id);
+        await api.put(`/api/staff/products/${id}`, form, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        alert("✅ Product updated successfully!");
+        navigate("/staff/menu");
+      } else {
+        // 등록
+        await api.post("/api/staff/products", form, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        alert("✅ Product added successfully!");
+        navigate("/staff/menu"); // ✅ 등록 후에도 이동 추가
+      }
     } catch (err) {
-      console.error("❌ Failed to update product:", err);
+      console.error("❌ Failed to save product:", err);
     }
   };
 
@@ -186,17 +196,17 @@ const StaffUpdateMenuForm = () => {
               <select
                 value={selectedCategoryId !== null ? String(selectedCategoryId) : ""}
                 onChange={(e) => {
-                  const id = e.target.value === "" ? null : Number(e.target.value);
-                  setSelectedCategoryId(id);
-                  console.log("✔ selectedCategoryId:", id);
+                  const value = e.target.value;
+                  setSelectedCategoryId(value === "" ? null : Number(value));
                 }}
               >
-                <option value="">Select Category</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={String(category.id)}>
-                    {category.categoryName}
-                  </option>
-                ))}
+                {categories.map((category) => {
+                  return (
+                    <option key={category.categoryId} value={String(category.categoryId)}>
+                      {category.categoryName}
+                    </option>
+                  );
+                })}
               </select>
             </div>
           </div>
@@ -243,7 +253,6 @@ const StaffUpdateMenuForm = () => {
                   onChange={(e) => {
                     const id = e.target.value === "" ? null : Number(e.target.value);
                     setSelectedSupplierId(id);
-                    console.log("✔ selectedSupplierId:", id);
                   }}
                 >
                   <option value="">Select Supplier</option>
@@ -263,25 +272,24 @@ const StaffUpdateMenuForm = () => {
             <label className="block text-sm font-semibold mb-1 mr-3">Price Type</label>
             <div className="flex gap-3">
               <div className="flex gap-3">
-                <label className="text-sm">
+                <label>
                   <input
                     type="radio"
                     name="priceType"
-                    value="Whole Wheel"
-                    checked={priceType === "Whole Wheel"}
-                    onChange={() => setPriceType("Whole Wheel")}
-                    className="mr-1"
+                    value="W"
+                    checked={priceType === "W"}
+                    onChange={() => setPriceType("W")}
                   />
                   Whole Wheel
                 </label>
-                <label className="text-sm">
+
+                <label>
                   <input
                     type="radio"
                     name="priceType"
-                    value="Pre-Pack"
-                    checked={priceType === "Pre-Pack"}
-                    onChange={() => setPriceType("Pre-Pack")}
-                    className="mr-1"
+                    value="U"
+                    checked={priceType === "U"}
+                    onChange={() => setPriceType("U")}
                   />
                   Pre-Pack
                 </label>
@@ -310,15 +318,16 @@ const StaffUpdateMenuForm = () => {
                   onChange={(e) => setSalePrice(e.target.value)}
                 />
               </div>
-              <div className="flex flex-col md:flex-row item-start md:items-center mb-2">
-                <label className="text-sm mr-3 w-[75px]">PLU</label>
-                <input
-                  type="text"
-                  className="w-full lg:w-[200px] border border-gray-300 px-2 py-1 rounded-md text-sm"
-                  value={plu}
-                  onChange={(e) => setPlu(e.target.value)}
-                />
-              </div>
+              {priceType === "W" && (
+                <div className="flex flex-col md:flex-row item-start md:items-center mb-2">
+                  <label className="text-sm mr-3 w-[75px]">PLU</label>
+                  <input
+                    type="text"
+                    className="w-full lg:w-[200px] border border-gray-300 px-2 py-1 rounded-md text-sm"
+                    value={plu}
+                    onChange={(e) => setPlu(e.target.value)}
+                  />
+                </div>)}
             </div>
             <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-2">
               <div>
@@ -331,11 +340,21 @@ const StaffUpdateMenuForm = () => {
                   }}
                 >
                   <option value="">Select Animal</option>
-                  {animals.map((animal) => (
-                    <option key={animal.animalId} value={String(animal.animalId)}>
-                      {animal.animalName}
-                    </option>
-                  ))}
+                  {animals
+                    .filter((animal) => {
+                      if (selectedCategoryId === 2) {
+                        // ✅ Cheese일 때 (categoryId === 2) → animalId 1~5만
+                        return animal.animalId >= 1 && animal.animalId <= 5;
+                      } else {
+                        // ✅ Cheese 외 카테고리 → animalId 6 이상만
+                        return animal.animalId >= 6 || animal.animalId == 4;
+                      }
+                    })
+                    .map((animal) => (
+                      <option key={animal.animalId} value={String(animal.animalId)}>
+                        {animal.animalName}
+                      </option>
+                    ))}
                 </select>
               </div>
 
@@ -354,7 +373,6 @@ const StaffUpdateMenuForm = () => {
                   value={selectedCountryId !== null ? String(selectedCountryId) : ""}
                   onChange={(e) => {
                     const id = e.target.value === "" ? null : Number(e.target.value);
-                    console.log("✔ selectedCountryId:", id); // 확인 로그
                     setSelectedCountryId(id);
                   }}
                 >
@@ -465,7 +483,6 @@ const StaffUpdateMenuForm = () => {
               onClick={handleSave}
               type="button"
               className="bg-[#AD343E] text-white px-4 py-2 rounded-md text-sm"
-              disabled={!formData}
             >
               Save
             </button>
@@ -476,4 +493,4 @@ const StaffUpdateMenuForm = () => {
   );
 };
 
-export default StaffUpdateMenuForm;
+export default StaffAddMenuForm;
