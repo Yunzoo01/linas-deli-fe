@@ -94,7 +94,7 @@ export interface SupplierDTO {
 }
 
 export interface CategoryDTO {
-  id: number; // categoryId ❌
+  categoryId: number; // categoryId ❌
   categoryName: string;
 }
 
