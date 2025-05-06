@@ -14,15 +14,12 @@ const StaffAddPromoModal: React.FC<StaffAddPromoModalProps> = ({ isOpen, onClose
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     const formData = new FormData(form);
-
+  
     try {
       await api.post("/api/staff/promotions", formData, {
-        withCredentials: true, 
         headers: {
-          // Axios automatically sets this when sending FormData, but you can explicitly add it for clarity
-          "Content-Type": "multipart/form-data",
+          "Content-Type": "multipart/form-data", // ✅ 헤더 명시
         },
-
       });
       alert("Promotion added!");
       onClose();
@@ -37,7 +34,7 @@ const StaffAddPromoModal: React.FC<StaffAddPromoModalProps> = ({ isOpen, onClose
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-lg p-6 w-[400px] space-y-4 relative">
         <h2 className="text-xl font-semibold text-center">Add Promotion</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-4">
           <div>
             <label className="block mb-1">Title</label>
             <input
