@@ -39,13 +39,12 @@ const Menu = () => {
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
-    fetchProductsByCategoryAndSearch(category, searchTerm);
   };
-
+  
   const handleSearch = (search: string) => {
     setSearchTerm(search);
-    fetchProductsByCategoryAndSearch(selectedCategory, search);
   };
+  
 
   const handleOpen = (item: MenuItem) => {
     setSelectedMenu(item);
@@ -53,8 +52,8 @@ const Menu = () => {
   };
 
   useEffect(() => {
-    fetchProductsByCategoryAndSearch("All", searchTerm); // Fetch products initially with no search term
-  }, [searchTerm]);
+    fetchProductsByCategoryAndSearch(selectedCategory, searchTerm);
+  }, [selectedCategory, searchTerm]);
 
   if (loading) {
     return <div>Loading...</div>;

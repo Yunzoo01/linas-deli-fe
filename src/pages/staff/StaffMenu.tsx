@@ -3,8 +3,8 @@ import api from "@/api/axios";
 import { useNavigate } from "react-router-dom";
 import { ProductListDTO } from "@/type"; // 백엔드에서 넘겨주는 정확한 타입 정의
 import StaffPageBanner from "@/components/staff/StaffPageBanner";
-import SearchBar from "@/components/SearchBar";
-import MenuCategory from "@/components/menu/MenuCategory";
+import StaffMenuCategory from "@/components/staff/StaffMenuCategory";
+import StaffSearchBar from "@/components/staff/StaffSearchBar";
 
 
 
@@ -91,13 +91,13 @@ const StaffMenu = () => {
     <div className="bg-[#C3E2C6] min-h-screen">
       <StaffPageBanner title="Menu" />
       <div className="flex flex-col lg:flex-row">
-        <MenuCategory selected={selectedCategory} onSelect={(categoryId) => setSelectedCategory(categoryId)} />
+        <StaffMenuCategory selected={selectedCategory} onSelect={(categoryId) => setSelectedCategory(categoryId)} />
 
         {/* Main Content */}
         <main className="flex-1 px-2 lg:px-10 py-4 lg:py-8 min-h-lvh ">
           {/* Search + Add */}
           <div className="flex flex-col mb-6">
-            <SearchBar value={searchKeyword} onChange={(value) => setSearchKeyword(value)} />
+            <StaffSearchBar value={searchKeyword} onChange={(value) => setSearchKeyword(value)} />
             <button
               className="bg-[#A73F3F] hover:bg-[#8f3535] px-6 py-2 text-white rounded-lg w-[82px] ml-auto lg:mr-10 mt-3"
               onClick={handleAddClick}
