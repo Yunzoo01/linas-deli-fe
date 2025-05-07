@@ -167,14 +167,14 @@ const StaffAddMenuForm = () => {
         // 수정
         form.append("pid", id);
         await api.put(`/api/staff/products/${id}`, form, {
-          headers: { "Content-Type": "multipart/form-data" },
+          // headers: { "Content-Type": "multipart/form-data" },
         });
         alert("✅ Product updated successfully!");
         navigate("/staff/menu");
       } else {
         // 등록
         await api.post("/api/staff/products", form, {
-          headers: { "Content-Type": "multipart/form-data" },
+          // headers: { "Content-Type": "multipart/form-data" },
         });
         alert("✅ Product added successfully!");
         navigate("/staff/menu"); // ✅ 등록 후에도 이동 추가
@@ -435,6 +435,7 @@ const StaffAddMenuForm = () => {
                     className="form-checkbox rounded-full h-5 w-5 text-green-500"
                     id="glutenFree"
                     checked={glutenFreeChecked}
+                    value="G" // ✅ 추가
                     onChange={() => handleCheckboxChange("glutenFree")}
                   />
                 </label>
@@ -449,6 +450,7 @@ const StaffAddMenuForm = () => {
                     className="form-checkbox rounded-full h-5 w-5 text-purple-500"
                     id="lactoseFree"
                     checked={lactoseFreeChecked}
+                    value="L" // ✅ 추가
                     onChange={() => handleCheckboxChange("lactoseFree")}
                   />
                 </label>

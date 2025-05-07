@@ -40,10 +40,10 @@ const StaffPromoModal = ({ isOpen, onClose, onUpdate, promotion }: Props) => {
 
               {promotion.promotionImageUrl && (
                 <img
-                  src={promotion.promotionImageUrl}
-                  alt={promotion.promotionTitle}
-                  className="w-full h-60 object-cover rounded-md border"
-                />
+                src={`${import.meta.env.VITE_API_BASE_URL}${promotion.promotionImageUrl}`}
+                alt={promotion.promotionTitle}
+                className="w-full h-60 object-cover rounded-md border"
+              />
               )}
 
               <div className="text-sm text-gray-700 space-y-1">

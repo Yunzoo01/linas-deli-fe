@@ -55,7 +55,7 @@ const StaffNavbar = () => {
           <li><Link to="/staff/menu" className="text-gray-700 hover:text-gray-900 cursor-pointer">Menu</Link></li>
           <li><Link to="/staff/order" className="text-gray-700 hover:text-gray-900 cursor-pointer">Order</Link></li>
           <li><Link to="/staff/mypage" className="text-gray-700 hover:text-gray-900 cursor-pointer">Mypage</Link></li>
-
+          <li><Link to="/staff/suppliers" className="text-gray-700 hover:text-gray-900 cursor-pointer">Supplier</Link></li>
           {isLoggedIn ? (
             <li onClick={handleLogout} className="text-gray-700 hover:text-gray-900 cursor-pointer">Logout</li>
           ) : (
@@ -78,7 +78,7 @@ const StaffNavbar = () => {
           <li><Link to="/staff/menu" className="text-white hover:text-gray-300 cursor-pointer" onClick={() => setIsOpen(false)}>Menu</Link></li>
           <li><Link to="/staff/order" className="text-white hover:text-gray-300 cursor-pointer" onClick={() => setIsOpen(false)}>Order</Link></li>
           <li><Link to="/staff/mypage" className="text-white hover:text-gray-300 cursor-pointer" onClick={() => setIsOpen(false)}>Mypage</Link></li>
-
+          <li><Link to="/staff/suppliers" className="text-white hover:text-gray-300 cursor-pointer" onClick={() => setIsOpen(false)}>Supplier</Link></li>
           {isLoggedIn ? (
             <li onClick={handleLogout} className="text-white hover:text-gray-300 cursor-pointer">Logout</li>
           ) : (
