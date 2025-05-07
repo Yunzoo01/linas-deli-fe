@@ -39,6 +39,10 @@ const StaffUpdateMenuForm = () => {
   const [description, setDescription] = useState("");
   const [suggestion, setSuggestion] = useState("");
 
+  const allergies: ("G" | "L")[] = [];
+  if (glutenFreeChecked) allergies.push("G");
+  if (lactoseFreeChecked) allergies.push("L");
+
   useEffect(() => {
     if (id) fetchProductForm(Number(id));
   }, [id]);
@@ -54,7 +58,7 @@ const StaffUpdateMenuForm = () => {
       setPriceType(formData.priceType as "W" | "U");
       setSupplierPrice(formData.supplierPrice.toString());
       setSalePrice(formData.salePrice.toString());
-      setPlu(formData.plu.toString());
+      setPlu(formData.plu !== null && formData.plu !== undefined ? formData.plu.toString() : "");
       setPasteurized(formData.pasteurized);
       setGlutenFreeChecked(formData.allergies.includes("G"));
       setLactoseFreeChecked(formData.allergies.includes("L"));
@@ -137,54 +141,53 @@ const StaffUpdateMenuForm = () => {
   };
 
   const handleSave = async () => {
-    const form = new FormData();
-    form.append("categoryId", String(selectedCategoryId!));
-    form.append("productName", productName);
-    form.append("supplierId", String(selectedSupplierId!));
-    form.append("priceType", priceType);
-    form.append("supplierPrice", supplierPrice);
-    form.append("salePrice", salePrice);
-    form.append("plu", plu);
-    form.append("animalId", String(selectedAnimalId!));
-    form.append("pasteurized", String(pasteurized));
-    form.append("originId", String(selectedCountryId!));
-    form.append("description", description);
-    form.append("suggestion", suggestion);
+  const form = new FormData();
+  form.append("categoryId", String(selectedCategoryId!));
+  form.append("productName", productName);
+  form.append("supplierId", String(selectedSupplierId!));
+  form.append("priceType", priceType);
+  form.append("supplierPrice", supplierPrice);
+  form.append("salePrice", salePrice);
+  form.append("plu", plu);
+  form.append("animalId", String(selectedAnimalId!));
+  form.append("pasteurized", String(pasteurized));
+  form.append("originId", String(selectedCountryId!));
+  form.append("description", description);
+  form.append("suggestion", suggestion);
 
+  const allergyList = [];
+  if (glutenFreeChecked) allergyList.push("G");
+  if (lactoseFreeChecked) allergyList.push("L");
 
-    const allergyList = [];
-    if (glutenFreeChecked) allergyList.push("G");
-    if (lactoseFreeChecked) allergyList.push("L");
+  // ✅ 하나씩 append 해줘야 Spring에서 List<Enum> 파싱 가능
+  for (const allergy of allergyList) {
+    form.append("allergies", allergy);
+  }
 
-    // ✅ 하나씩 append 해줘야 Spring에서 List<Enum> 파싱 가능
-    for (const allergy of allergyList) {
-      form.append("allergies", allergy);
+  if (productImageFile) form.append("productImage", productImageFile);
+  if (ingredientsImageFile) form.append("ingredientsImage", ingredientsImageFile);
+
+  try {
+    if (id) {
+      // 수정
+      form.append("pid", id);
+      await api.put(`/api/staff/products/${id}`, form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      alert("✅ Product updated successfully!");
+      navigate("/staff/menu");
+    } else {
+      // 등록
+      await api.post("/api/staff/products", form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      alert("✅ Product added successfully!");
+      navigate("/staff/menu"); // ✅ 등록 후에도 이동 추가
     }
-
-    if (productImageFile) form.append("productImage", productImageFile);
-    if (ingredientsImageFile) form.append("ingredientsImage", ingredientsImageFile);
-
-    try {
-      if (id) {
-        // 수정
-        form.append("pid", id);
-        await api.put(`/api/staff/products/${id}`, form, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        alert("✅ Product updated successfully!");
-        navigate("/staff/menu");
-      } else {
-        // 등록
-        await api.post("/api/staff/products", form, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        alert("✅ Product added successfully!");
-        navigate("/staff/menu"); // ✅ 등록 후에도 이동 추가
-      }
-    } catch (err) {
-      console.error("❌ Failed to save product:", err);
-    }
-  };
+  } catch (err) {
+    console.error("❌ Failed to save product:", err);
+  }
+};
 
   return (
     <>
@@ -446,6 +449,7 @@ const StaffUpdateMenuForm = () => {
                     className="form-checkbox rounded-full h-5 w-5 text-green-500"
                     id="glutenFree"
                     checked={glutenFreeChecked}
+                    value="G" // ✅ 추가
                     onChange={() => handleCheckboxChange("glutenFree")}
                   />
                 </label>
@@ -460,6 +464,7 @@ const StaffUpdateMenuForm = () => {
                     className="form-checkbox rounded-full h-5 w-5 text-purple-500"
                     id="lactoseFree"
                     checked={lactoseFreeChecked}
+                    value="L" // ✅ 추가
                     onChange={() => handleCheckboxChange("lactoseFree")}
                   />
                 </label>
