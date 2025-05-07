@@ -435,6 +435,7 @@ const StaffAddMenuForm = () => {
                     className="form-checkbox rounded-full h-5 w-5 text-green-500"
                     id="glutenFree"
                     checked={glutenFreeChecked}
+                    value="G" // ✅ 추가
                     onChange={() => handleCheckboxChange("glutenFree")}
                   />
                 </label>
@@ -449,6 +450,7 @@ const StaffAddMenuForm = () => {
                     className="form-checkbox rounded-full h-5 w-5 text-purple-500"
                     id="lactoseFree"
                     checked={lactoseFreeChecked}
+                    value="L" // ✅ 추가
                     onChange={() => handleCheckboxChange("lactoseFree")}
                   />
                 </label>
