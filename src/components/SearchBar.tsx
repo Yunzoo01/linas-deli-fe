@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 
 interface SearchBarProps {
   onSearch: (search: string) => void; // The prop to handle the search term
@@ -8,7 +8,7 @@ const SearchBar = ({ onSearch }: SearchBarProps) => {
   const [searchTerm, setSearchTerm] = useState("");
 
   const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(event.target.value);
+    setSearchTerm(event.target.value);
   };
 
   const handleSearch = () => {
@@ -35,7 +35,7 @@ const SearchBar = ({ onSearch }: SearchBarProps) => {
         type="text"
         className="flex-grow outline-none"
         placeholder="Search"
-        value={value}
+        value={searchTerm}
         onChange={handleInputChange}
         onKeyDown={handleInputKeyDown}
       />
