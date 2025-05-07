@@ -61,9 +61,8 @@ const Layout = () => {
           <Route path="/staff/add-menu" element={<RequireAuth><StaffAddMenuForm /></RequireAuth>} />
           <Route path="/staff/update-menu" element={<RequireAuth><StaffUpdateMenuForm /></RequireAuth>} />
           <Route path="/staff/order" element={<RequireAuth><StaffOrderHistory /></RequireAuth>} />
-          <Route path="/staff/profile" element={<RequireAuth><StaffMyInfo /></RequireAuth>} />
           <Route path="/staff/mypage" element={<RequireAuth><StaffMyInfo /></RequireAuth>} />
-          <Route path="/staff/suppliers" element={<RequireAuth><StaffSuppliers /></RequireAuth>} />
+          <Route path="/staff/suppliers" element={<RequireAuth><StaffSuppliers/></RequireAuth>} />
         </Routes>
       </div>
 
