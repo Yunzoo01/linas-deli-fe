@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom"; // Import useLocation hook
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolling, setScrolling] = useState(false);
+  const location = useLocation(); // Get the current path
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 100) {
+      if (window.scrollY > 100 && location.pathname === "/") { // Only trigger scrolling effect on homepage
         setScrolling(true);
       } else {
         setScrolling(false);
@@ -19,26 +20,33 @@ const Navbar = () => {
     return () => {
       window.removeEventListener("scroll", handleScroll);
     };
-  }, []);
+  }, [location.pathname]); // Re-run when the location changes
+
+  // Determine if we are on the homepage or not
+  const isHomePage = location.pathname === "/";
 
   return (
     <nav
       className={`${
-        scrolling ? "bg-white shadow-md" : "bg-transparent"
+        isHomePage
+          ? scrolling
+            ? "bg-white shadow-md"
+            : "bg-transparent"
+          : "bg-white text-black" // Fixed background for other pages
       } absolute sm:fixed top-0 left-0 w-full z-100 max-w-[120rem] mx-auto sm:shadow-none transition-all duration-300`}
     >
       <div className="w-full flex h-[3.375rem] justify-end items-center sm:h-auto sm:justify-between sm:items-center sm:px-13 sm:py-6">
         {/* 로고 */}
         <Link to="/" className="text-2xl font-bold hidden sm:block w-[160px]">
           <img
-            src={scrolling ? "logo_black.svg" : "logo_white.svg"} // 스크롤에 따라 로고 변경
+            src={isHomePage ? (scrolling ? "logo_black.svg" : "logo_white.svg") : "logo_black.svg"} // 홈 페이지에서만 스크롤에 따라 로고 변경
             alt="Logo"
           />
         </Link>
 
         {/* 햄버거 버튼 */}
         <button
-          className="sm:hidden w-12 h-12 text-2xl"
+          className={`sm:hidden w-12 h-12 text-2xl ${isHomePage ? 'text-white': 'text-black'}`}
           onClick={() => setIsOpen(!isOpen)}
         >
           ☰
@@ -50,7 +58,11 @@ const Navbar = () => {
             <Link
               to="/menu"
               className={`${
-                scrolling ? "text-gray-900 hover:text-gray-700" : "text-white hover:text-gray-300"
+                isHomePage
+                  ? scrolling
+                    ? "text-gray-900 hover:text-gray-700"
+                    : "text-white hover:text-gray-300"
+                  : "text-black hover:text-gray-700"
               }`}
             >
               Menu
@@ -60,7 +72,11 @@ const Navbar = () => {
             <Link
               to="/order"
               className={`${
-                scrolling ? "text-gray-900 hover:text-gray-700" : "text-white hover:text-gray-300"
+                isHomePage
+                  ? scrolling
+                    ? "text-gray-900 hover:text-gray-700"
+                    : "text-white hover:text-gray-300"
+                  : "text-black hover:text-gray-700"
               }`}
             >
               Order
@@ -70,7 +86,11 @@ const Navbar = () => {
             <Link
               to="/contact"
               className={`${
-                scrolling ? "text-gray-900 hover:text-gray-700" : "text-white hover:text-gray-300"
+                isHomePage
+                  ? scrolling
+                    ? "text-gray-900 hover:text-gray-700"
+                    : "text-white hover:text-gray-300"
+                  : "text-black hover:text-gray-700"
               }`}
             >
               Contact
@@ -98,7 +118,7 @@ const Navbar = () => {
             <Link to="/" onClick={() => setIsOpen(false)}>
               <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0 mb-4 shadow">
                 <img
-                  src={scrolling ? "logo_black.svg" : "logo_white.svg"} // 스크롤에 따라 로고 변경
+                  src="favicon_750.png" // 스크롤에 따라 로고 변경
                   alt="Logo"
                   className="w-full h-full object-cover scale-101"
                 />
@@ -108,9 +128,7 @@ const Navbar = () => {
           <li>
             <Link
               to="/menu"
-              className={`${
-                scrolling ? "text-gray-900 hover:text-gray-700" : "text-white hover:text-gray-300"
-              }`}
+              className="text-gray-900 hover:text-gray-700"
               onClick={() => setIsOpen(false)}
             >
               Menu
@@ -119,9 +137,7 @@ const Navbar = () => {
           <li>
             <Link
               to="/order"
-              className={`${
-                scrolling ? "text-gray-900 hover:text-gray-700" : "text-white hover:text-gray-300"
-              }`}
+              className="text-gray-900 hover:text-gray-700"
               onClick={() => setIsOpen(false)}
             >
               Order
@@ -130,9 +146,7 @@ const Navbar = () => {
           <li>
             <Link
               to="/contact"
-              className={`${
-                scrolling ? "text-gray-900 hover:text-gray-700" : "text-white hover:text-gray-300"
-              }`}
+              className="text-gray-900 hover:text-gray-700"
               onClick={() => setIsOpen(false)}
             >
               Contact

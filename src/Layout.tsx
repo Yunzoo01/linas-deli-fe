@@ -16,6 +16,7 @@ import StaffAddMenuForm from "./pages/staff/menu/StaffAddMenuForm";
 import { useAuth } from "./auth/AuthContext";
 import StaffUpdateMenuForm from "./pages/staff/menu/StaffUpdateMenuForm";
 import { ReactNode } from "react";  // Import ReactNode
+import StaffSuppliers from "./pages/staff/StaffSuppliers";
 
 // 로그인된 사용자만 접근 가능한 컴포넌트
 const RequireAuth = ({ children }: { children: ReactNode }) => {
@@ -46,7 +47,7 @@ const Layout = () => {
         ""
       )}
 
-      <div className={`pt-20 ${!isLoginPage ? "sm:pt-0" : ""} text-base`}> {/* 로그인 페이지일 경우 sm:pt-20을 제외 */}
+      <div className={`pt-0 ${!isLoginPage ? "sm:pt-0" : ""} text-base`}> {/* 로그인 페이지일 경우 sm:pt-20을 제외 */}
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/menu" element={<Menu />} />
@@ -61,7 +62,8 @@ const Layout = () => {
           <Route path="/staff/update-menu" element={<RequireAuth><StaffUpdateMenuForm /></RequireAuth>} />
           <Route path="/staff/order" element={<RequireAuth><StaffOrderHistory /></RequireAuth>} />
           <Route path="/staff/profile" element={<RequireAuth><StaffMyInfo /></RequireAuth>} />
-          <Route path="/staff/promotion" element={<RequireAuth><StaffPromotionList /></RequireAuth>} />
+          <Route path="/staff/mypage" element={<RequireAuth><StaffMyInfo /></RequireAuth>} />
+          <Route path="/staff/suppliers" element={<RequireAuth><StaffSuppliers /></RequireAuth>} />
         </Routes>
       </div>
 

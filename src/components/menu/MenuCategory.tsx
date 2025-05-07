@@ -1,52 +1,61 @@
-import { useState } from "react";
+import * as React from "react";
 
-const categories = ["All", "Meat", "Cheese", "Others"];
+const categories = ["All", "Meat", "Cheese", "Others", "Bulk"];
 
-const MenuCategory = () => {
-  const [activeCategory, setActiveCategory] = useState("All");
+interface MenuCategoryProps {
+  onCategoryChange: (category: string) => void;
+  selectedCategory: string; // Added selectedCategory prop
+}
+
+const MenuCategory: React.FC<MenuCategoryProps> = ({ onCategoryChange, selectedCategory }) => {
+  // Handle category selection
+  const handleCategoryClick = (category: string) => {
+    onCategoryChange(category);  // Pass the selected category to the parent
+  };
 
   return (
     <>
-    <div className="flex lg:hidden flex-col w-80 mx-auto mt-[50px]">
-      <h2 className="text-center text-xl font-semibold">Categories</h2>
-      <ul className="flex justify-between py-5">
-        {categories.map((category) => {
-          const isActive = activeCategory === category;
+      {/* Mobile View */}
+      <div className="flex lg:hidden flex-col w-80 mx-auto mt-[50px]">
+        <h2 className="text-center text-xl font-semibold">Categories</h2>
+        <ul className="flex justify-between py-5">
+          {categories.map((category) => {
+            const isActive = selectedCategory === category; // Use selectedCategory prop
 
-          return (
+            return (
+              <li
+                key={category}
+                onClick={() => handleCategoryClick(category)}
+                className={`cursor-pointer px-4 py-2 rounded-full transition-all duration-200 ${
+                  isActive ? "bg-[#8E5927] text-white" : "bg-transparent text-[#1A202C]"
+                }`}
+              >
+                {category}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
+      {/* Sidebar (Desktop) */}
+      <aside className="hidden lg:flex flex-col justify-end w-60 h-[400px] bg-[#AD343E] text-white p-6 rounded-b-xl ml-6">
+        <h2 className="text-lg font-bold mb-6">Categories</h2>
+        <ul className="space-y-2">
+          {categories.map((category) => (
             <li
               key={category}
-              onClick={() => setActiveCategory(category)}
-              className={`cursor-pointer px-4 py-2 rounded-full transition-all duration-200`}
-              style={{
-                backgroundColor: isActive ? "#8E5927" : "transparent",
-                color: isActive ? "white" : "#1A202C",
-              }}
+              onClick={() => handleCategoryClick(category)}
+              className={`flex justify-between items-center py-2 px-4 rounded-full cursor-pointer ${
+                selectedCategory === category
+                  ? "bg-white text-black font-semibold"
+                  : "hover:bg-[#AD343E]"
+              }`}
             >
-              {category}
+              {category} <span className="ml-2">→</span>
             </li>
-          );
-        })}
-      </ul>
-    </div>
-    {/* Sidebar */}
-    <aside className="hidden lg:flex flex-col justify-end w-60 h-[400px] bg-[#AD343E] text-white p-6 rounded-b-xl ml-6">
-    <h2 className="text-lg font-bold mb-6">Categories</h2>
-    <ul className="space-y-2">
-      <li className="flex justify-between items-center py-2 px-4 rounded-full bg-white text-black font-semibold cursor-pointer">
-        All <span className="ml-2">→</span>
-      </li>
-      <li className="flex justify-between items-center py-2 px-4 rounded-full hover:bg-[#AD343E] cursor-pointer">
-        Cheeses <span className="ml-2">→</span>
-      </li>
-      <li className="flex justify-between items-center py-2 px-4 rounded-full hover:bg-[#AD343E] cursor-pointer">
-        Meat <span className="ml-2">→</span>
-      </li>
-      <li className="flex justify-between items-center py-2 px-4 rounded-full hover:bg-[#AD343E] cursor-pointer">
-        Others <span className="ml-2">→</span>
-      </li>
-    </ul>
-    </aside>
+          ))}
+        </ul>
+      </aside>
     </>
   );
 };

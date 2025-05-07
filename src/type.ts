@@ -1,7 +1,7 @@
 // src/types.ts
 export interface Product {
   id: number;
-  name: string;
+  productName: string;
   description: string;
   allergy: string[];
   price: number;
@@ -106,4 +106,12 @@ export interface AnimalDTO {
 export interface CountryDTO {
   countryId: number;      // ✅ 'id' ❌ → 'countryId' ⭕
   countryName: string;
+}
+
+export interface Supplier {
+  sid: number;
+  contactName: string;
+  sEmail: string;
+  sPhone: string;
+  note: string;
 }

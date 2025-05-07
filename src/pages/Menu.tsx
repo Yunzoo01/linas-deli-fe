@@ -1,5 +1,4 @@
-// src/pages/Menu.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import MenuCategory from "@/components/menu/MenuCategory";
 import MenuRow from "@/components/menu/MenuRow";
 import MenuModal from "@/components/menu/MenuModal";
@@ -7,76 +6,82 @@ import PageBanner from "@/components/PageBanner";
 import SearchBar from "@/components/SearchBar";
 
 // Import the types
-import { MenuItem } from "@/type";  // import types here
+import { MenuItem } from "@/type";
+import api from "@/api/axios";
 
 const Menu = () => {
   const [selectedMenu, setSelectedMenu] = useState<MenuItem | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [productDetails, setProductDetails] = useState<MenuItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [searchTerm, setSearchTerm] = useState(""); // Track the search term
+
+  const fetchProductsByCategoryAndSearch = async (category: string, search: string) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const endpoint =
+        category === "All"
+          ? `/api/products?keyword=${encodeURIComponent(search)}`
+          : `/api/products?category=${encodeURIComponent(category)}&keyword=${encodeURIComponent(search)}`;
+
+      const response = await api.get(endpoint);
+      setProductDetails(response.data.content); // Assuming your response structure has `content`
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    fetchProductsByCategoryAndSearch(category, searchTerm);
+  };
+
+  const handleSearch = (search: string) => {
+    setSearchTerm(search);
+    fetchProductsByCategoryAndSearch(selectedCategory, search);
+  };
 
   const handleOpen = (item: MenuItem) => {
     setSelectedMenu(item);
     setIsModalOpen(true);
   };
 
-  const productDetails: MenuItem[] = [
-    {
-      productDetailId: 1,
-      product: {
-        id: 1,
-        name: "Canadian Cheese",
-        description: "A semi-hard cheese from Canada.",
-        allergy: ["gluten"],
-        price: 10,
-        glutenFree: false,
-        servingSuggestion: "Bread, crackers, apples, and white wine.",
-        pasteurized: true,
-        imageUrl: "/image/menu/menu01.png",
-        ingredientImageUrl: "image/nutrition/nutrition01.png"
-      },
-      country: {
-        id: 1,
-        name: "Canada"
-      },
-      animal: {
-        id: 1,
-        name: "Cow"
-      }
-    },
-    {
-      productDetailId: 2,
-      product: {
-        id: 2,
-        name: "Truffle Ham",
-        description: "Premium ham with truffle aroma.",
-        allergy: ["lactose"],
-        price: 15,
-        glutenFree: true,
-        servingSuggestion: "Bread, crackers, apples, and white wine.",
-        pasteurized: true,
-        imageUrl: "/image/menu/menu02.png",
-        ingredientImageUrl: "image/nutrition/nutrition01.png"
-      },
-      country: {
-        id: 2,
-        name: "Italy"
-      },
-      animal: {
-        id: 2,
-        name: "Pig"
-      }
-    }
-  ];
+  useEffect(() => {
+    fetchProductsByCategoryAndSearch("All", searchTerm); // Fetch products initially with no search term
+  }, [searchTerm]);
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    return <div>Error: {error}</div>;
+  }
 
   return (
     <div className="bg-[#FFFAEF]">
       <PageBanner title="Menu" />
       <div className="container mx-auto flex flex-col lg:flex-row">
-        <MenuCategory />
-        <div className="lg:ml-15 my-2 lg:my-10">
-          <SearchBar />
+        <MenuCategory 
+          onCategoryChange={handleCategoryChange} 
+          selectedCategory={selectedCategory}  // Pass selectedCategory to MenuCategory
+        />
+        <div className="lg:ml-15 my-2 lg:my-10 w-full">
+          <SearchBar onSearch={handleSearch} /> {/* Pass handleSearch function to SearchBar */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4 mt-[30px]">
-            {productDetails.map((item) => (
-              <MenuRow key={item.product.id} item={item} handleOpen={handleOpen} />
+            {productDetails.map((item, index) => (
+              <MenuRow 
+                key={item.pid} 
+                item={item} 
+                handleOpen={handleOpen} 
+                delay={index * 0.1}  // Stagger the animation by 0.1s for each item
+              />
             ))}
           </div>
         </div>
@@ -84,7 +89,7 @@ const Menu = () => {
       <MenuModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        menuItem={selectedMenu} // Pass MenuItem here
+        menuItem={selectedMenu}
       />
     </div>
   );

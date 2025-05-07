@@ -5,7 +5,7 @@ interface PageBannerProps {
   const PageBanner = ({ title }: PageBannerProps) => {
     return (
         <div>
-            <section className="relative w-full h-[380px] lg:h-[280px] flex items-center lg:justify-start justify-center text-center overflow-hidden">
+            <section className="mt-20 relative w-full h-[380px] lg:h-[280px] flex items-center lg:justify-start justify-center text-center overflow-hidden">
                 {/* 배경 이미지 */}
                 <div className="absolute inset-0 rounded-b-4xl lg:rounded-b-none overflow-hidden">
                     <img
