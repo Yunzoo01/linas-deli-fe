@@ -112,6 +112,7 @@ const StaffEditPromoModal: React.FC<Props> = ({ isOpen, onClose, promotion, onSu
                   accept="image/*"
                   onChange={(e) => setImage(e.target.files?.[0] || null)}
                 />
+                <br/><span className="text-sm text-red-600">⦿ Modal Aspect Ratio: 800×600px (4:3 ratio)</span>
               </div>
               <div className="flex justify-end space-x-3 pt-4">
                 <button type="button" onClick={onClose} className="px-4 py-2 border rounded">

@@ -25,6 +25,15 @@ export interface Animal {
 export interface MenuItem {
   productDetailId: number;
   product: Product;
+  productName: string;
+  countryName: string;
+  description:string;
+  servingSuggestion:string;
+  pasteurized:string;
+  animalName:string;
+  ingredientsImageUrl:string;
+  pid:number;
+  imageUrl:string;
   country: Country;
   animal: Animal;
 }
@@ -113,6 +122,7 @@ export interface CountryDTO {
 export interface Supplier {
   sid: number;
   contactName: string;
+  supplierName: string;
   sEmail: string;
   sPhone: string;
   note: string;

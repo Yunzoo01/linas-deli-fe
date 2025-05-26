@@ -49,7 +49,7 @@ const StaffUpdateMenuForm = () => {
 
   useEffect(() => {
     if (formData) {
-      console.log("✅ previewImageUrl:", formData.productImageUrl);
+      // console.log("✅ previewImageUrl:", formData.productImageUrl);
       setProductName(formData.productName);
       setSelectedCategoryId(formData.categoryId);
       setSelectedSupplierId(formData.supplierId);

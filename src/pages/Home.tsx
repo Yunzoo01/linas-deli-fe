@@ -40,7 +40,7 @@ const Home = () => {
           promotions={activePromotions}
           currentIndex={currentIndex}
           onNext={handleNext}
-          onClose={() => setIsModalOpen(false)} // 옵션: 즉시 닫기용
+          // onClose={() => setIsModalOpen(false)} // 옵션: 즉시 닫기용
         />
       )}
 

@@ -55,6 +55,7 @@ const StaffAddPromoModal: React.FC<StaffAddPromoModalProps> = ({ isOpen, onClose
           <div>
             <label className="block mb-1">Image (optional)</label>
             <input name="image" type="file" accept="image/*" className="w-full" />
+            <br/><span className="text-sm text-red-600">⦿ Modal Aspect Ratio: 800×600px (4:3 ratio)</span>
           </div>
           <div className="flex justify-between">
             <button type="button" onClick={onClose} className="px-4 py-2 border rounded">

@@ -11,8 +11,6 @@ const StaffSuppliers = () => {
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [isOpen, setIsOpen] = useState<boolean>(false);
-  const [selectedSupplier, setSelectedSupplier] = useState();
 
   useEffect(() => {
     const fetchSuppliers = async () => {
@@ -68,8 +66,8 @@ const StaffSuppliers = () => {
                 <StaffSupplierRow 
                   key={suppliers.sid}  // key prop 추가
                   suppliers={suppliers} 
-                  setIsOpen={setIsOpen} 
-                  setSelectedSupplier={setSelectedSupplier} 
+                  // setIsOpen={setIsOpen} 
+                  // setSelectedSupplier={setSelectedSupplier} 
                 />
               ))
             ) : (

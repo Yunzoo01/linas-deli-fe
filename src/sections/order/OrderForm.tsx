@@ -7,7 +7,7 @@ import { AxiosError } from "axios"; // Import AxiosError
 const OrderForm = () => {
   const { boxType } = useParams();
   const navigate = useNavigate(); // Initialize navigate
-  console.log(boxType);
+  // console.log(boxType);
 
   const [formData, setFormData] = useState({
     date: "",
@@ -36,10 +36,10 @@ const OrderForm = () => {
       return;
     }
 
-    console.log("📤 Sending formData:", formData);
+    // console.log("📤 Sending formData:", formData);
     try {
       const response = await api.post("/api/orders", formData);
-      console.log("Create Success:", response.data);
+      // console.log("Create Success:", response.data);
       toast.success("Order submitted successfully!");
       navigate("/order");
     } catch (error) {

@@ -9,7 +9,7 @@ interface Props {
 
 const MenuRow = ({ item, handleOpen, index }: Props) => {
   const [isVisible, setIsVisible] = useState(false);
-
+// console.log(item);
   useEffect(() => {
     // 카드가 일정 시간 후에 보이도록 설정 (순차적으로)
     const timeout = setTimeout(() => {
@@ -26,7 +26,7 @@ const MenuRow = ({ item, handleOpen, index }: Props) => {
     >
       <img
         className="w-full h-60 object-cover rounded-2xl"
-        src={item.productImageUrl}
+        src={`${import.meta.env.VITE_API_BASE_URL}${item.imageUrl}`}
         alt="Card Image"
       />
       <div className="p-4">

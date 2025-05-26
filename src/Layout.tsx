@@ -10,13 +10,13 @@ import StaffNavbar from "./components/staff/StaffNavbar";
 import StaffLogin from "./pages/staff/StaffLogin";
 import StaffMenu from "./pages/staff/StaffMenu";
 import StaffOrderHistory from "./pages/staff/StaffOrderHistory";
-import StaffPromotionList from "./pages/staff/StaffPromotionList";
 import StaffMyInfo from "./pages/staff/StaffMyInfo";
 import StaffAddMenuForm from "./pages/staff/menu/StaffAddMenuForm";
 import { useAuth } from "./auth/AuthContext";
 import StaffUpdateMenuForm from "./pages/staff/menu/StaffUpdateMenuForm";
 import { ReactNode } from "react";  // Import ReactNode
 import StaffSuppliers from "./pages/staff/StaffSuppliers";
+import NotFound from "./pages/Notfound";
 
 // 로그인된 사용자만 접근 가능한 컴포넌트
 const RequireAuth = ({ children }: { children: ReactNode }) => {
@@ -63,6 +63,8 @@ const Layout = () => {
           <Route path="/staff/order" element={<RequireAuth><StaffOrderHistory /></RequireAuth>} />
           <Route path="/staff/mypage" element={<RequireAuth><StaffMyInfo /></RequireAuth>} />
           <Route path="/staff/suppliers" element={<RequireAuth><StaffSuppliers/></RequireAuth>} />
+
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </div>
 

@@ -16,7 +16,7 @@ const StaffSearchBar: React.FC<SearchBarProps> = ({ value, onChange }) => {
 
   const handleInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
-      console.log(`검색어: ${value}`);
+      // console.log(`검색어: ${value}`);
     }
   };
 

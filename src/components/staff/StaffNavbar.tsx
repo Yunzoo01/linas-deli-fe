@@ -11,7 +11,7 @@ const StaffNavbar = () => {
 
   useEffect(() => {
     const sessionID = sessionStorage.getItem("sessionId");
-    console.log("Session ID:", sessionID); // Log to ensure the session ID exists
+    // console.log("Session ID:", sessionID); // Log to ensure the session ID exists
     if (sessionID) {
       setIsLoggedIn(true);
     } else {

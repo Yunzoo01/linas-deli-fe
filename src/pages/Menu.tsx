@@ -8,6 +8,7 @@ import SearchBar from "@/components/SearchBar";
 // Import the types
 import { MenuItem } from "@/type";
 import api from "@/api/axios";
+import Pagination from "@/components/Pagination";
 
 const Menu = () => {
   const [selectedMenu, setSelectedMenu] = useState<MenuItem | null>(null);
@@ -17,6 +18,8 @@ const Menu = () => {
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchTerm, setSearchTerm] = useState(""); // Track the search term
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   const fetchProductsByCategoryAndSearch = async (category: string, search: string) => {
     setLoading(true);
@@ -29,6 +32,7 @@ const Menu = () => {
           : `/api/products?category=${encodeURIComponent(category)}&keyword=${encodeURIComponent(search)}`;
 
       const response = await api.get(endpoint);
+      console.log(response.data);
       setProductDetails(response.data.content); // Assuming your response structure has `content`
     } catch (err: any) {
       setError(err.message);
@@ -49,6 +53,10 @@ const Menu = () => {
   const handleOpen = (item: MenuItem) => {
     setSelectedMenu(item);
     setIsModalOpen(true);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   useEffect(() => {
@@ -79,10 +87,16 @@ const Menu = () => {
                 key={item.pid} 
                 item={item} 
                 handleOpen={handleOpen} 
-                delay={index * 0.1}  // Stagger the animation by 0.1s for each item
+                index={index * 0.1}
               />
             ))}
           </div>
+          
+          <Pagination 
+            currentPage={currentPage} 
+            totalPages={totalPages} 
+            onPageChange={handlePageChange} 
+          />
         </div>
       </div>
       <MenuModal

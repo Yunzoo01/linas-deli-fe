@@ -38,14 +38,14 @@ const StaffOrderModal = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("📤 Sending formData:", formData);
+    // console.log("📤 Sending formData:", formData);
     try {
       const response = await api.put(
         `/api/staff/orders/${formData.oid}`,
         formData,
       );
 
-      console.log("Update Success:", response.data);
+      // console.log("Update Success:", response.data);
       updateOrder(response.data);
       setIsOpen(false);
       toast.success("Order status updated!", {

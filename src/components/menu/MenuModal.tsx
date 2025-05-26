@@ -67,10 +67,10 @@ const MenuModal = ({ isOpen, onClose, menuItem }: Props) => {
                   </div>
                 </div>
 
-                {menuItem.ingredientImageUrl && (
+                {menuItem.ingredientsImageUrl && (
                   <div className="flex-1">
                     <img
-                      src={menuItem.ingredientImageUrl}
+                      src={`${import.meta.env.VITE_API_BASE_URL}${menuItem.ingredientsImageUrl}`}
                       alt="Ingredient"
                       className="w-full h-auto rounded-lg border object-contain shadow"
                     />
