@@ -31,14 +31,23 @@ const StaffAddMenuForm = () => {
   const [lactoseFreeChecked, setLactoseFreeChecked] = useState(false);
 
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
-  const [previewIngredientsImageUrl, setPreviewIngredientsImageUrl] = useState<string | null>(null);
-
   const [productImageFile, setProductImageFile] = useState<File | null>(null);
-  const [ingredientsImageFile, setIngredientsImageFile] = useState<File | null>(null);
 
+  const [previewIngredientsImageUrl, setPreviewIngredientsImageUrl] = useState<string | null>(null);
+  const [ingredientsImageFile, setIngredientsImageFile] = useState<File | null>(null);
 
   const [description, setDescription] = useState("");
   const [suggestion, setSuggestion] = useState("");
+
+  const [errors, setErrors] = useState<{ [key: string]: boolean }>({});
+
+  const handleCheckboxChange = (type: "glutenFree" | "lactoseFree") => {
+    if (type === "glutenFree") {
+      setGlutenFreeChecked((prev) => !prev);
+    } else if (type === "lactoseFree") {
+      setLactoseFreeChecked((prev) => !prev);
+    }
+  };
 
   useEffect(() => {
     if (id) fetchProductForm(Number(id));
@@ -64,6 +73,10 @@ const StaffAddMenuForm = () => {
       setSuggestion(formData.suggestion);
     }
   }, [formData]);
+
+  useEffect(() => {
+    fetchInitialData();
+  }, []);
 
   const fetchProductForm = async (productId: number) => {
     try {
@@ -91,50 +104,29 @@ const StaffAddMenuForm = () => {
     }
   };
 
-  useEffect(() => {
-    fetchInitialData();
-  }, []);
-
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setProductImageFile(file); // 파일 저장
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (reader.result) {
-          setPreviewImageUrl(reader.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleIngredientsImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setIngredientsImageFile(file); // 파일 저장
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (reader.result) {
-          setPreviewIngredientsImageUrl(reader.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleCheckboxChange = (id: string) => {
-    switch (id) {
-      case "glutenFree":
-        setGlutenFreeChecked(!glutenFreeChecked);
-        break;
-      case "lactoseFree":
-        setLactoseFreeChecked(!lactoseFreeChecked);
-        break;
-    }
-  };
-
   const handleSave = async () => {
+    const newErrors: { [key: string]: boolean } = {};
+
+    if (!productName.trim()) newErrors.productName = true;
+    if (!selectedCategoryId) newErrors.categoryId = true;
+    if (!selectedSupplierId) newErrors.supplierId = true;
+    if (!selectedAnimalId) newErrors.animalId = true;
+    if (!selectedCountryId) newErrors.countryId = true;
+
+    if (!supplierPrice.trim()) newErrors.supplierPrice = true;
+    if (!salePrice.trim()) newErrors.salePrice = true;
+    if (priceType === "W" && !plu.trim()) newErrors.plu = true;
+
+    if (!description.trim()) newErrors.description = true;
+    if (!suggestion.trim()) newErrors.suggestion = true;
+
+    // if (!productImageFile && !previewImageUrl) newErrors.productImage = true;
+    // if (!ingredientsImageFile && !previewIngredientsImageUrl) newErrors.ingredientsImage = true;
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) return; // 🚫 저장 중단
+
     const form = new FormData();
     form.append("categoryId", String(selectedCategoryId!));
     form.append("productName", productName);
@@ -149,38 +141,58 @@ const StaffAddMenuForm = () => {
     form.append("description", description);
     form.append("suggestion", suggestion);
 
-
     const allergyList = [];
     if (glutenFreeChecked) allergyList.push("G");
     if (lactoseFreeChecked) allergyList.push("L");
-
-    // ✅ 하나씩 append 해줘야 Spring에서 List<Enum> 파싱 가능
-    for (const allergy of allergyList) {
-      form.append("allergies", allergy);
-    }
+    allergyList.forEach((a) => form.append("allergies", a));
 
     if (productImageFile) form.append("productImage", productImageFile);
     if (ingredientsImageFile) form.append("ingredientsImage", ingredientsImageFile);
 
     try {
       if (id) {
-        // 수정
         form.append("pid", id);
         await api.put(`/api/staff/products/${id}`, form, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         alert("✅ Product updated successfully!");
-        navigate("/staff/menu");
       } else {
-        // 등록
         await api.post("/api/staff/products", form, {
           headers: { "Content-Type": "multipart/form-data" },
         });
         alert("✅ Product added successfully!");
-        navigate("/staff/menu"); // ✅ 등록 후에도 이동 추가
       }
+      navigate("/staff/menu");
     } catch (err) {
       console.error("❌ Failed to save product:", err);
+    }
+  };
+
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setProductImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (reader.result) {
+          setPreviewImageUrl(reader.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleIngredientsImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setIngredientsImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (reader.result) {
+          setPreviewIngredientsImageUrl(reader.result as string);
+        }
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -194,19 +206,22 @@ const StaffAddMenuForm = () => {
             <div className="flex">
 
               <select
+                className={`w-full px-2 py-1 rounded-md text-sm border ${errors.categoryId ? "border-red-500" : "border-gray-300"
+                  }`}
                 value={selectedCategoryId !== null ? String(selectedCategoryId) : ""}
                 onChange={(e) => {
                   const value = e.target.value;
                   setSelectedCategoryId(value === "" ? null : Number(value));
                 }}
               >
-                {categories.map((category) => {
-                  return (
-                    <option key={category.categoryId} value={String(category.categoryId)}>
-                      {category.categoryName}
-                    </option>
-                  );
-                })}
+                <option value="" disabled hidden>
+                  -- Select Category --
+                </option>
+                {categories.map((category) => (
+                  <option key={category.categoryId} value={String(category.categoryId)}>
+                    {category.categoryName}
+                  </option>
+                ))}
               </select>
             </div>
           </div>
@@ -239,16 +254,20 @@ const StaffAddMenuForm = () => {
                 image upload
               </label>
             </div>
+
             <div className="flex-1 grid grid-cols-2 gap-4 items-center">
               <input
                 type="text"
-                className="w-full border border-gray-300 px-2 py-1 rounded-md text-sm"
+                className={`w-full px-2 py-1 rounded-md text-sm border ${errors.productName ? "border-red-500" : "border-gray-300"
+                  }`}
                 value={productName}
                 onChange={(e) => setProductName(e.target.value)}
               />
               <div>
                 <label className="block text-sm font-semibold mb-1">Supplier</label>
                 <select
+                  className={`w-full px-2 py-1 rounded-md text-sm border ${errors.supplierId ? "border-red-500" : "border-gray-300"
+                    }`}
                   value={selectedSupplierId !== null ? String(selectedSupplierId) : ""}
                   onChange={(e) => {
                     const id = e.target.value === "" ? null : Number(e.target.value);
@@ -262,7 +281,6 @@ const StaffAddMenuForm = () => {
                     </option>
                   ))}
                 </select>
-
               </div>
             </div>
           </div>
@@ -271,68 +289,75 @@ const StaffAddMenuForm = () => {
           <div className="flex mb-4 items-center">
             <label className="block text-sm font-semibold mb-1 mr-3">Price Type</label>
             <div className="flex gap-3">
-              <div className="flex gap-3">
-                <label>
-                  <input
-                    type="radio"
-                    name="priceType"
-                    value="W"
-                    checked={priceType === "W"}
-                    onChange={() => setPriceType("W")}
-                  />
-                  Whole Wheel
-                </label>
+              <label>
+                <input
+                  type="radio"
+                  name="priceType"
+                  value="W"
+                  checked={priceType === "W"}
+                  onChange={() => setPriceType("W")}
+                />
+                Whole Wheel
+              </label>
 
-                <label>
-                  <input
-                    type="radio"
-                    name="priceType"
-                    value="U"
-                    checked={priceType === "U"}
-                    onChange={() => setPriceType("U")}
-                  />
-                  Pre-Pack
-                </label>
-              </div>
+              <label>
+                <input
+                  type="radio"
+                  name="priceType"
+                  value="U"
+                  checked={priceType === "U"}
+                  onChange={() => setPriceType("U")}
+                />
+                Pre-Pack
+              </label>
             </div>
           </div>
 
           {/* Row 3: Detailed Information */}
           <div className="mb-4 flex flex-col lg:flex-row">
             <div className="flex-1 mr-4">
-              <div className="flex flex-col md:flex-row item-start md:items-center mb-2">
+              <div className="flex flex-col md:flex-row items-start md:items-center mb-2">
                 <label className="text-sm mr-3 w-[75px]">Cost / Kg</label>
                 <input
                   type="text"
-                  className="w-full lg:w-[200px] border border-gray-300 px-2 py-1 rounded-md text-sm"
+                  className={`w-full lg:w-[200px] px-2 py-1 rounded-md text-sm border ${errors.supplierPrice ? "border-red-500" : "border-gray-300"
+                    }`}
                   value={supplierPrice}
                   onChange={(e) => setSupplierPrice(e.target.value)}
                 />
               </div>
-              <div className="flex flex-col md:flex-row item-start md:items-center mb-2">
+
+              <div className="flex flex-col md:flex-row items-start md:items-center mb-2">
                 <label className="text-sm mr-3 w-[75px]">Sale price</label>
                 <input
                   type="text"
-                  className="w-full lg:w-[200px] border border-gray-300 px-2 py-1 rounded-md text-sm"
+                  className={`w-full lg:w-[200px] px-2 py-1 rounded-md text-sm border ${errors.salePrice ? "border-red-500" : "border-gray-300"
+                    }`}
                   value={salePrice}
                   onChange={(e) => setSalePrice(e.target.value)}
                 />
               </div>
+
               {priceType === "W" && (
-                <div className="flex flex-col md:flex-row item-start md:items-center mb-2">
+                <div className="flex flex-col md:flex-row items-start md:items-center mb-2">
                   <label className="text-sm mr-3 w-[75px]">PLU</label>
                   <input
                     type="text"
-                    className="w-full lg:w-[200px] border border-gray-300 px-2 py-1 rounded-md text-sm"
+                    className={`w-full lg:w-[200px] px-2 py-1 rounded-md text-sm border ${errors.plu ? "border-red-500" : "border-gray-300"
+                      }`}
                     value={plu}
                     onChange={(e) => setPlu(e.target.value)}
                   />
-                </div>)}
+                </div>
+              )}
             </div>
+
             <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-2">
               <div>
                 <label className="block text-sm font-semibold mb-1">Source Animal</label>
                 <select
+                  className={`w-full px-2 py-1 rounded-md text-sm border ${errors.animalId ? "border-red-500" : "border-gray-300"
+                    }`}
                   value={selectedAnimalId !== null ? String(selectedAnimalId) : ""}
                   onChange={(e) => {
                     const id = e.target.value === "" ? null : Number(e.target.value);
@@ -343,11 +368,9 @@ const StaffAddMenuForm = () => {
                   {animals
                     .filter((animal) => {
                       if (selectedCategoryId === 2) {
-                        // ✅ Cheese일 때 (categoryId === 2) → animalId 1~5만
                         return animal.animalId >= 1 && animal.animalId <= 5;
                       } else {
-                        // ✅ Cheese 외 카테고리 → animalId 6 이상만
-                        return animal.animalId >= 6 || animal.animalId == 4;
+                        return animal.animalId >= 6 || animal.animalId === 4;
                       }
                     })
                     .map((animal) => (
@@ -367,9 +390,12 @@ const StaffAddMenuForm = () => {
                   className="w-4 h-4"
                 />
               </div>
+
               <div>
                 <label className="block text-sm font-semibold mb-1">Country of Origin</label>
                 <select
+                  className={`w-full px-2 py-1 rounded-md text-sm border ${errors.countryId ? "border-red-500" : "border-gray-300"
+                    }`}
                   value={selectedCountryId !== null ? String(selectedCountryId) : ""}
                   onChange={(e) => {
                     const id = e.target.value === "" ? null : Number(e.target.value);
@@ -392,7 +418,7 @@ const StaffAddMenuForm = () => {
             {/* Ingredients 이미지 업로드 */}
             <div>
               <label className="block text-sm font-semibold mb-1">Ingredients</label>
-              <div className="w-36 h-28 bg-gray-200 rounded mb-2 flex items-center justify-center">
+              <div className={`w-36 h-28 rounded mb-2 flex items-center justify-center ${errors.ingredientsImage ? "border-2 border-red-500" : "bg-gray-200"}`}>
                 {previewIngredientsImageUrl ? (
                   <img
                     src={previewIngredientsImageUrl}
@@ -462,7 +488,7 @@ const StaffAddMenuForm = () => {
           <div className="mb-4">
             <label className="block text-sm font-semibold mb-1">Product Description</label>
             <textarea
-              className="w-full border border-gray-300 px-2 py-1 rounded-md text-sm"
+              className={`w-full border px-2 py-1 rounded-md text-sm ${errors.description ? "border-red-500" : "border-gray-300"}`}
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -473,7 +499,7 @@ const StaffAddMenuForm = () => {
           <div className="mb-6">
             <label className="block text-sm font-semibold mb-1">Serving suggestion</label>
             <textarea
-              className="w-full border border-gray-300 px-2 py-1 rounded-md text-sm"
+              className={`w-full border px-2 py-1 rounded-md text-sm ${errors.suggestion ? "border-red-500" : "border-gray-300"}`}
               rows={2}
               value={suggestion}
               onChange={(e) => setSuggestion(e.target.value)}

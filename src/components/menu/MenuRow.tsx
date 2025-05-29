@@ -4,38 +4,49 @@ import { MenuItem } from "@/type";
 interface Props {
   item: MenuItem;
   handleOpen: (item: MenuItem) => void;
-  index: number; // 카드의 인덱스를 받도록 함
+  index: number;
 }
 
 const MenuRow = ({ item, handleOpen, index }: Props) => {
   const [isVisible, setIsVisible] = useState(false);
-// console.log(item);
+
   useEffect(() => {
-    // 카드가 일정 시간 후에 보이도록 설정 (순차적으로)
+    console.log("MenuRow item:", item); // ✅ 콘솔에 출력
     const timeout = setTimeout(() => {
       setIsVisible(true);
-    }, index * 200); // index에 따라 지연 시간 설정
-
+    }, index * 200);
     return () => clearTimeout(timeout);
   }, [index]);
 
+  const imageUrl = item.imageUrl?.startsWith("http")
+  ? item.imageUrl
+  : `${import.meta.env.VITE_API_BASE_URL}${item.imageUrl}`;
+
   return (
     <div
-      key={item.product.id}
       className={`bg-white rounded-2xl shadow-lg overflow-hidden ${isVisible ? "card-animate" : ""}`}
     >
       <img
         className="w-full h-60 object-cover rounded-2xl"
-        src={`${import.meta.env.VITE_API_BASE_URL}${item.imageUrl}`}
-        alt="Card Image"
+        src={imageUrl}
+        alt={item.productName || "Image"}
+        onError={(e) => {
+          (e.target as HTMLImageElement).src = "/fallback.png"; // fallback image
+        }}
       />
       <div className="p-4">
-        <h2 className="text-xl font-semibold mb-2">{item.product.productName}</h2>
-        <p className="text-gray-600 mb-2">{item.country.name}</p>
-        <p className="text-gray-600 mb-2">{item.product.description}</p>
+        <h2 className="text-xl font-semibold mb-2">
+          {item.productName ?? item.product?.productName ?? "No Name"}
+        </h2>
+        <p className="text-gray-600 mb-2">
+          {item.countryName ?? "Unknown Country"}
+        </p>
+        <p className="text-gray-600 mb-2">
+          {item.description ?? item.product?.description ?? "No description available."}
+        </p>
         <div className="text-right">
           <button
-            onClick={() => handleOpen(item)} // Pass MenuItem
+            onClick={() => handleOpen(item)}
             className="border border-black text-black bg-transparent px-4 py-2 rounded-l-full rounded-r-full hover:bg-black hover:text-white transition"
           >
             Read More

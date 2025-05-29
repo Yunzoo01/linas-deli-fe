@@ -1,4 +1,3 @@
-// src/components/menu/MenuModal.tsx
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { X } from "lucide-react";
@@ -12,6 +11,29 @@ interface Props {
 
 const MenuModal = ({ isOpen, onClose, menuItem }: Props) => {
   if (!menuItem) return null;
+
+  // 재사용 가능한 알러지 마크 렌더링
+  const renderAllergyMarks = () => {
+    if (!menuItem.allergies || menuItem.allergies.length === 0) return null;
+
+    return (
+      <div className="flex items-center gap-2 mt-2">
+        {menuItem.allergies.includes("G") && (
+          <div className="flex items-center gap-1">
+            <img src="/Icon/allergy/icon_glutenfree.png" alt="GlutenFree" className="w-6 h-6" />
+            <span className="text-sm text-gray-600">Gluten Free</span>
+          </div>
+        )}
+        {menuItem.allergies.includes("L") && (
+          <div className="flex items-center gap-1">
+            <img src="/Icon/allergy/icon_lactosefree.png" alt="LactoseFree" className="w-6 h-6" />
+            <span className="text-sm text-gray-600">Lactose Free</span>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
@@ -39,6 +61,7 @@ const MenuModal = ({ isOpen, onClose, menuItem }: Props) => {
                     alt={menuItem.countryName}
                     className="w-6 h-4 object-cover shadow-sm"
                   />
+                  {renderAllergyMarks()}
                 </Dialog.Title>
                 <button onClick={onClose} className="text-gray-500 hover:text-black">
                   <X size={20} />
@@ -67,6 +90,7 @@ const MenuModal = ({ isOpen, onClose, menuItem }: Props) => {
                   </div>
                 </div>
 
+                {/* 재료 이미지 */}
                 {menuItem.ingredientsImageUrl && (
                   <div className="flex-1">
                     <img

@@ -4,11 +4,10 @@ import MenuRow from "@/components/menu/MenuRow";
 import MenuModal from "@/components/menu/MenuModal";
 import PageBanner from "@/components/PageBanner";
 import SearchBar from "@/components/SearchBar";
+import Pagination from "@/components/Pagination"; // 추가된 부분
 
-// Import the types
 import { MenuItem } from "@/type";
 import api from "@/api/axios";
-import Pagination from "@/components/Pagination";
 
 const Menu = () => {
   const [selectedMenu, setSelectedMenu] = useState<MenuItem | null>(null);
@@ -17,23 +16,23 @@ const Menu = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [searchTerm, setSearchTerm] = useState(""); // Track the search term
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(0); // 0-based for Spring
+  const [totalPages, setTotalPages] = useState(1); // 총 페이지 수
 
-  const fetchProductsByCategoryAndSearch = async (category: string, search: string) => {
+  const fetchProducts = async (category: string, search: string, page: number) => {
     setLoading(true);
     setError(null);
-
     try {
-      const endpoint =
+      const baseUrl =
         category === "All"
           ? `/api/products?keyword=${encodeURIComponent(search)}`
           : `/api/products?category=${encodeURIComponent(category)}&keyword=${encodeURIComponent(search)}`;
+      const fullUrl = `${baseUrl}&page=${page}&size=6`; // page는 0-based, size는 한 페이지당 6개
+      const response = await api.get(fullUrl);
 
-      const response = await api.get(endpoint);
-      console.log(response.data);
-      setProductDetails(response.data.content); // Assuming your response structure has `content`
+      setProductDetails(response.data.content);
+      setTotalPages(response.data.totalPages); // 총 페이지 수 저장
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -43,33 +42,25 @@ const Menu = () => {
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
+    setCurrentPage(0); // 새 카테고리 선택 시 페이지 초기화
   };
-  
+
   const handleSearch = (search: string) => {
     setSearchTerm(search);
+    setCurrentPage(0); // 검색 시에도 페이지 초기화
   };
-  
 
   const handleOpen = (item: MenuItem) => {
     setSelectedMenu(item);
     setIsModalOpen(true);
   };
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
   useEffect(() => {
-    fetchProductsByCategoryAndSearch(selectedCategory, searchTerm);
-  }, [selectedCategory, searchTerm]);
+    fetchProducts(selectedCategory, searchTerm, currentPage);
+  }, [selectedCategory, searchTerm, currentPage]);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="bg-[#FFFAEF]">
@@ -77,28 +68,32 @@ const Menu = () => {
       <div className="container mx-auto flex flex-col lg:flex-row">
         <MenuCategory 
           onCategoryChange={handleCategoryChange} 
-          selectedCategory={selectedCategory}  // Pass selectedCategory to MenuCategory
+          selectedCategory={selectedCategory} 
         />
         <div className="lg:ml-15 my-2 lg:my-10 w-full">
-          <SearchBar onSearch={handleSearch} /> {/* Pass handleSearch function to SearchBar */}
+          <SearchBar onSearch={handleSearch} />
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4 mt-[30px]">
             {productDetails.map((item, index) => (
               <MenuRow 
                 key={item.pid} 
                 item={item} 
                 handleOpen={handleOpen} 
-                index={index * 0.1}
+                delay={index * 0.1}
               />
             ))}
           </div>
-          
-          <Pagination 
-            currentPage={currentPage} 
-            totalPages={totalPages} 
-            onPageChange={handlePageChange} 
-          />
+
+          {/* Pagination 컴포넌트 */}
+          <div className="mt-6">
+            <Pagination
+              currentPage={currentPage + 1} // 1-based로 보여주기
+              totalPages={totalPages}
+              onPageChange={(page) => setCurrentPage(page - 1)} // 클릭 시 0-based로 변환
+            />
+          </div>
         </div>
       </div>
+
       <MenuModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

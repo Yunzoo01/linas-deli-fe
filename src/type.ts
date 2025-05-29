@@ -36,6 +36,7 @@ export interface MenuItem {
   imageUrl:string;
   country: Country;
   animal: Animal;
+  allergies?: string[];
 }
 // src/types.ts
 export interface Promotion {
