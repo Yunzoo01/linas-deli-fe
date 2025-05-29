@@ -21,7 +21,7 @@ const MenuRow = ({ item, handleOpen, index }: Props) => {
 
   return (
     <div
-      key={item.pid}
+      key={item.product.id}
       className={`bg-white rounded-2xl shadow-lg overflow-hidden ${isVisible ? "card-animate" : ""}`}
     >
       <img
@@ -30,9 +30,9 @@ const MenuRow = ({ item, handleOpen, index }: Props) => {
         alt="Card Image"
       />
       <div className="p-4">
-        <h2 className="text-xl font-semibold mb-2">{item.productName}</h2>
-        <p className="text-gray-600 mb-2">{item.countryName}</p>
-        <p className="text-gray-600 mb-2">{item.description}</p>
+        <h2 className="text-xl font-semibold mb-2">{item.product.productName}</h2>
+        <p className="text-gray-600 mb-2">{item.country.name}</p>
+        <p className="text-gray-600 mb-2">{item.product.description}</p>
         <div className="text-right">
           <button
             onClick={() => handleOpen(item)} // Pass MenuItem
