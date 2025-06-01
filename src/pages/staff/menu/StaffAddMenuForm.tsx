@@ -3,8 +3,17 @@ import api from "@/api/axios";
 import StaffPageBanner from "@/components/staff/StaffPageBanner";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { ProductFormResponseDTO, SupplierDTO, CategoryDTO, AnimalDTO, CountryDTO } from "@/type";
+import CropModal from '../../../components/staff/CropModal';
+import { base64ToBlob } from "../../../components/staff/utils/base64ToBlob";
+import heic2any from "heic2any";
 
 const StaffAddMenuForm = () => {
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [showCropModal, setShowCropModal] = useState(false);
+
+  const [uploadedIngredientsImage, setUploadedIngredientsImage] = useState<string | null>(null);
+  const [showIngredientsCropModal, setShowIngredientsCropModal] = useState(false);
+
   const [searchParams] = useSearchParams();
   const id = searchParams.get("id");
   const navigate = useNavigate();
@@ -146,9 +155,28 @@ const StaffAddMenuForm = () => {
     if (lactoseFreeChecked) allergyList.push("L");
     allergyList.forEach((a) => form.append("allergies", a));
 
-    if (productImageFile) form.append("productImage", productImageFile);
-    if (ingredientsImageFile) form.append("ingredientsImage", ingredientsImageFile);
+    // ✅ 크롭된 이미지 (Base64 → Blob → File로 변환해서 추가)
+    if (previewImageUrl && !productImageFile) {
+      const blob = base64ToBlob(previewImageUrl);
+      const file = new File([blob], "cropped.jpg", { type: "image/jpeg" });
+      form.append("productImage", file);
+    }
 
+    // ✅ 사용자가 직접 업로드한 이미지 파일
+    if (productImageFile) {
+      form.append("productImage", productImageFile);
+    }
+
+    // ✅ 재료 이미지도 필요하면 동일하게 처리
+    if (previewIngredientsImageUrl && !ingredientsImageFile) {
+      const blob = base64ToBlob(previewIngredientsImageUrl);
+      const file = new File([blob], "ingredients.jpg", { type: "image/jpeg" });
+      form.append("ingredientsImage", file);
+    }
+
+    if (ingredientsImageFile) {
+      form.append("ingredientsImage", ingredientsImageFile);
+    }
     try {
       if (id) {
         form.append("pid", id);
@@ -168,33 +196,58 @@ const StaffAddMenuForm = () => {
     }
   };
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setProductImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (reader.result) {
-          setPreviewImageUrl(reader.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+ const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
 
-  const handleIngredientsImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setIngredientsImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (reader.result) {
-          setPreviewIngredientsImageUrl(reader.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
-    }
+  let imageFile = file;
+
+  if (file.name.endsWith(".heic") || file.type === "image/heic") {
+    const convertedBlob = await heic2any({ blob: file, toType: "image/jpeg" });
+    imageFile = new File([convertedBlob as BlobPart], file.name + ".jpg", {
+      type: "image/jpeg",
+    });
+  }
+
+  const reader = new FileReader();
+  reader.onloadend = () => {
+    const base64 = reader.result as string;
+    setUploadedImage(base64);       // ✅ 크롭용 원본 이미지 저장
+    setShowCropModal(true);         // ✅ 모달 열기
   };
+  reader.readAsDataURL(imageFile);
+};
+
+  const handleIngredientsImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const file = event.target.files?.[0];
+  if (!file) return;
+
+  let imageFile = file;
+
+  // HEIC → JPEG 변환
+  if (file.name.toLowerCase().endsWith(".heic") || file.type === "image/heic") {
+    try {
+      const convertedBlob = await heic2any({ blob: file, toType: "image/jpeg" });
+      imageFile = new File([convertedBlob as BlobPart], file.name + ".jpg", {
+        type: "image/jpeg",
+      });
+    } catch (error) {
+      console.error("HEIC 변환 실패:", error);
+      return;
+    }
+  }
+
+  // 최종 파일 저장
+  setIngredientsImageFile(imageFile);
+
+  // base64 → 미리보기 및 크롭 모달
+  const reader = new FileReader();
+  reader.onloadend = () => {
+    setUploadedIngredientsImage(reader.result as string);  // base64 저장
+    setShowIngredientsCropModal(true);                    // 크롭 모달 열기
+  };
+  reader.readAsDataURL(imageFile);
+};
 
   return (
     <>
@@ -253,6 +306,16 @@ const StaffAddMenuForm = () => {
               >
                 image upload
               </label>
+              {/* ✅ 여기에 크롭 모달 삽입 */}
+              {showCropModal && uploadedImage && (
+                <CropModal
+                  imageSrc={uploadedImage}
+                  onClose={() => setShowCropModal(false)}
+                  onCropDone={(croppedImage) => {
+                    setPreviewImageUrl(croppedImage);
+                  }}
+                />
+              )}
             </div>
 
             <div className="flex-1 grid grid-cols-2 gap-4 items-center">
@@ -444,6 +507,20 @@ const StaffAddMenuForm = () => {
               >
                 image upload
               </label>
+              {/* ✅ 여기에 크롭 모달 삽입 */}
+              {/* ✅ 여기에 ingredients용 모달 삽입 */}
+              {showIngredientsCropModal && uploadedIngredientsImage && (
+                <CropModal
+                  imageSrc={uploadedIngredientsImage}
+                  onClose={() => setShowIngredientsCropModal(false)}
+                  onCropDone={(croppedImage) => {
+                    setPreviewIngredientsImageUrl(croppedImage); // 미리보기용
+                    const blob = base64ToBlob(croppedImage);     // 네 함수로 Blob 생성
+                    const file = new File([blob], "ingredients.jpg", { type: "image/jpeg" });
+                    setIngredientsImageFile(file);               // 전송용 파일로 저장
+                  }}
+                />
+              )}
             </div>
 
             {/* 알러지 체크박스 */}

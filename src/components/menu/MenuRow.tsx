@@ -19,8 +19,8 @@ const MenuRow = ({ item, handleOpen, index }: Props) => {
   }, [index]);
 
   const imageUrl = item.imageUrl?.startsWith("http")
-  ? item.imageUrl
-  : `${import.meta.env.VITE_API_BASE_URL}${item.imageUrl}`;
+    ? item.imageUrl
+    : `${import.meta.env.VITE_API_BASE_URL}${item.imageUrl}`;
 
   return (
     <div
@@ -42,7 +42,10 @@ const MenuRow = ({ item, handleOpen, index }: Props) => {
           {item.countryName ?? "Unknown Country"}
         </p>
         <p className="text-gray-600 mb-2">
-          {item.description ?? item.product?.description ?? "No description available."}
+          {(() => {
+            const desc = item.description ?? item.product?.description ?? "No description available.";
+            return desc.length > 80 ? `${desc.slice(0, 80)}...` : desc;
+          })()}
         </p>
         <div className="text-right">
           <button
