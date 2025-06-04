@@ -50,6 +50,12 @@ const StaffAddMenuForm = () => {
 
   const [errors, setErrors] = useState<{ [key: string]: boolean }>({});
 
+  // 예: 카테고리 이름 기준으로 분기 (categoryId -> categoryName 매핑이 가능할 때)
+  const selectedCategory = categories.find(c => c.categoryId === selectedCategoryId);
+  const isMeat = selectedCategory?.categoryName === "Meat";
+  const isOther = selectedCategory?.categoryName === "Others";
+  const isBulk = selectedCategory?.categoryName === "Bulk";
+
   const handleCheckboxChange = (type: "glutenFree" | "lactoseFree") => {
     if (type === "glutenFree") {
       setGlutenFreeChecked((prev) => !prev);
@@ -119,8 +125,8 @@ const StaffAddMenuForm = () => {
     if (!productName.trim()) newErrors.productName = true;
     if (!selectedCategoryId) newErrors.categoryId = true;
     if (!selectedSupplierId) newErrors.supplierId = true;
-    if (!selectedAnimalId) newErrors.animalId = true;
-    if (!selectedCountryId) newErrors.countryId = true;
+    if (!isOther && !selectedAnimalId) newErrors.animalId = true;
+    if (!isOther && !selectedCountryId) newErrors.countryId = true;
 
     if (!supplierPrice.trim()) newErrors.supplierPrice = true;
     if (!salePrice.trim()) newErrors.salePrice = true;
@@ -137,6 +143,7 @@ const StaffAddMenuForm = () => {
     if (Object.keys(newErrors).length > 0) return; // 🚫 저장 중단
 
     const form = new FormData();
+    // ✅ form 기본 값
     form.append("categoryId", String(selectedCategoryId!));
     form.append("productName", productName);
     form.append("supplierId", String(selectedSupplierId!));
@@ -144,16 +151,25 @@ const StaffAddMenuForm = () => {
     form.append("supplierPrice", supplierPrice);
     form.append("salePrice", salePrice);
     form.append("plu", plu);
-    form.append("animalId", String(selectedAnimalId!));
-    form.append("pasteurized", String(pasteurized));
-    form.append("originId", String(selectedCountryId!));
     form.append("description", description);
     form.append("suggestion", suggestion);
 
+    // ✅ allergy 추가
     const allergyList = [];
     if (glutenFreeChecked) allergyList.push("G");
     if (lactoseFreeChecked) allergyList.push("L");
     allergyList.forEach((a) => form.append("allergies", a));
+
+    // ✅ animal / origin / pasteurized는 Others가 아닐 때만 추가
+    if (!isOther) {
+      if (selectedAnimalId !== null) {
+        form.append("animalId", String(selectedAnimalId));
+      }
+      if (selectedCountryId !== null) {
+        form.append("originId", String(selectedCountryId));
+      }
+      form.append("pasteurized", String(pasteurized));
+    }
 
     // ✅ 크롭된 이미지 (Base64 → Blob → File로 변환해서 추가)
     if (previewImageUrl && !productImageFile) {
@@ -177,6 +193,7 @@ const StaffAddMenuForm = () => {
     if (ingredientsImageFile) {
       form.append("ingredientsImage", ingredientsImageFile);
     }
+
     try {
       if (id) {
         form.append("pid", id);
@@ -196,58 +213,58 @@ const StaffAddMenuForm = () => {
     }
   };
 
- const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  let imageFile = file;
+    let imageFile = file;
 
-  if (file.name.endsWith(".heic") || file.type === "image/heic") {
-    const convertedBlob = await heic2any({ blob: file, toType: "image/jpeg" });
-    imageFile = new File([convertedBlob as BlobPart], file.name + ".jpg", {
-      type: "image/jpeg",
-    });
-  }
-
-  const reader = new FileReader();
-  reader.onloadend = () => {
-    const base64 = reader.result as string;
-    setUploadedImage(base64);       // ✅ 크롭용 원본 이미지 저장
-    setShowCropModal(true);         // ✅ 모달 열기
-  };
-  reader.readAsDataURL(imageFile);
-};
-
-  const handleIngredientsImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-  const file = event.target.files?.[0];
-  if (!file) return;
-
-  let imageFile = file;
-
-  // HEIC → JPEG 변환
-  if (file.name.toLowerCase().endsWith(".heic") || file.type === "image/heic") {
-    try {
+    if (file.name.endsWith(".heic") || file.type === "image/heic") {
       const convertedBlob = await heic2any({ blob: file, toType: "image/jpeg" });
       imageFile = new File([convertedBlob as BlobPart], file.name + ".jpg", {
         type: "image/jpeg",
       });
-    } catch (error) {
-      console.error("HEIC 변환 실패:", error);
-      return;
     }
-  }
 
-  // 최종 파일 저장
-  setIngredientsImageFile(imageFile);
-
-  // base64 → 미리보기 및 크롭 모달
-  const reader = new FileReader();
-  reader.onloadend = () => {
-    setUploadedIngredientsImage(reader.result as string);  // base64 저장
-    setShowIngredientsCropModal(true);                    // 크롭 모달 열기
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64 = reader.result as string;
+      setUploadedImage(base64);       // ✅ 크롭용 원본 이미지 저장
+      setShowCropModal(true);         // ✅ 모달 열기
+    };
+    reader.readAsDataURL(imageFile);
   };
-  reader.readAsDataURL(imageFile);
-};
+
+  const handleIngredientsImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    let imageFile = file;
+
+    // HEIC → JPEG 변환
+    if (file.name.toLowerCase().endsWith(".heic") || file.type === "image/heic") {
+      try {
+        const convertedBlob = await heic2any({ blob: file, toType: "image/jpeg" });
+        imageFile = new File([convertedBlob as BlobPart], file.name + ".jpg", {
+          type: "image/jpeg",
+        });
+      } catch (error) {
+        console.error("HEIC 변환 실패:", error);
+        return;
+      }
+    }
+
+    // 최종 파일 저장
+    setIngredientsImageFile(imageFile);
+
+    // base64 → 미리보기 및 크롭 모달
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setUploadedIngredientsImage(reader.result as string);  // base64 저장
+      setShowIngredientsCropModal(true);                    // 크롭 모달 열기
+    };
+    reader.readAsDataURL(imageFile);
+  };
 
   return (
     <>
@@ -416,65 +433,68 @@ const StaffAddMenuForm = () => {
             </div>
 
             <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-2">
-              <div>
-                <label className="block text-sm font-semibold mb-1">Source Animal</label>
-                <select
-                  className={`w-full px-2 py-1 rounded-md text-sm border ${errors.animalId ? "border-red-500" : "border-gray-300"
-                    }`}
-                  value={selectedAnimalId !== null ? String(selectedAnimalId) : ""}
-                  onChange={(e) => {
-                    const id = e.target.value === "" ? null : Number(e.target.value);
-                    setSelectedAnimalId(id);
-                  }}
-                >
-                  <option value="">Select Animal</option>
-                  {animals
-                    .filter((animal) => {
+              {!isOther && (
+                <div>
+                  <label className="block text-sm font-semibold mb-1">Source Animal</label>
+                  <select
+                    className={`w-full px-2 py-1 rounded-md text-sm border ${errors.animalId ? "border-red-500" : "border-gray-300"}`}
+                    value={selectedAnimalId !== null ? String(selectedAnimalId) : ""}
+                    onChange={(e) => {
+                      const id = e.target.value === "" ? null : Number(e.target.value);
+                      setSelectedAnimalId(id);
+                    }}
+                  >
+                    <option value="">Select Animal</option>
+                    {(isBulk ? animals : animals.filter((animal) => {
                       if (selectedCategoryId === 2) {
                         return animal.animalId >= 1 && animal.animalId <= 5;
                       } else {
                         return animal.animalId >= 6 || animal.animalId === 4;
                       }
-                    })
-                    .map((animal) => (
+                    })).map((animal) => (
                       <option key={animal.animalId} value={String(animal.animalId)}>
                         {animal.animalName}
                       </option>
                     ))}
-                </select>
-              </div>
+                  </select>
+                </div>
+              )}
 
-              <div className="flex items-center gap-3">
-                <label className="text-sm font-semibold">Pasteurized</label>
-                <input
-                  type="checkbox"
-                  checked={pasteurized}
-                  onChange={() => setPasteurized(!pasteurized)}
-                  className="w-4 h-4"
-                />
-              </div>
+              {!isMeat && !isOther && (
+                <div className="flex items-center gap-3">
+                  <label className="text-sm font-semibold">Pasteurized</label>
+                  <input
+                    type="checkbox"
+                    checked={pasteurized}
+                    onChange={() => setPasteurized(!pasteurized)}
+                    className="w-4 h-4"
+                  />
+                </div>
+              )}
 
-              <div>
-                <label className="block text-sm font-semibold mb-1">Country of Origin</label>
-                <select
-                  className={`w-full px-2 py-1 rounded-md text-sm border ${errors.countryId ? "border-red-500" : "border-gray-300"
-                    }`}
-                  value={selectedCountryId !== null ? String(selectedCountryId) : ""}
-                  onChange={(e) => {
-                    const id = e.target.value === "" ? null : Number(e.target.value);
-                    setSelectedCountryId(id);
-                  }}
-                >
-                  <option value="">Select Country</option>
-                  {countries.map((country) => (
-                    <option key={country.countryId} value={String(country.countryId)}>
-                      {country.countryName}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {!isOther && (
+                <div>
+                  <label className="block text-sm font-semibold mb-1">Country of Origin</label>
+                  <select
+                    className={`w-full px-2 py-1 rounded-md text-sm border ${errors.countryId ? "border-red-500" : "border-gray-300"}`}
+                    value={selectedCountryId !== null ? String(selectedCountryId) : ""}
+                    onChange={(e) => {
+                      const id = e.target.value === "" ? null : Number(e.target.value);
+                      setSelectedCountryId(id);
+                    }}
+                  >
+                    <option value="">Select Country</option>
+                    {countries.map((country) => (
+                      <option key={country.countryId} value={String(country.countryId)}>
+                        {country.countryName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
           </div>
+
 
           {/* Row 4: Ingredients and Allergy Mark */}
           <div className="flex gap-6 mb-6 items-start justify-between">
@@ -561,6 +581,7 @@ const StaffAddMenuForm = () => {
             </div>
           </div>
 
+
           {/* Row 5: Product Description */}
           <div className="mb-4">
             <label className="block text-sm font-semibold mb-1">Product Description</label>
@@ -593,7 +614,7 @@ const StaffAddMenuForm = () => {
             </button>
           </div>
         </div>
-      </form>
+      </form >
     </>
   );
 };
