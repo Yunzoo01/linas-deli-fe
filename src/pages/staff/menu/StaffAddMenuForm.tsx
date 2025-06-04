@@ -6,6 +6,7 @@ import { ProductFormResponseDTO, SupplierDTO, CategoryDTO, AnimalDTO, CountryDTO
 import CropModal from '../../../components/staff/CropModal';
 import { base64ToBlob } from "../../../components/staff/utils/base64ToBlob";
 import heic2any from "heic2any";
+import { resizeImage } from "../../../components/staff/utils/resizeImage";
 
 const StaffAddMenuForm = () => {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -171,28 +172,21 @@ const StaffAddMenuForm = () => {
       form.append("pasteurized", String(pasteurized));
     }
 
-    // ✅ 크롭된 이미지 (Base64 → Blob → File로 변환해서 추가)
-    if (previewImageUrl && !productImageFile) {
-      const blob = base64ToBlob(previewImageUrl);
-      const file = new File([blob], "cropped.jpg", { type: "image/jpeg" });
-      form.append("productImage", file);
-    }
+   // ✅ 크롭된 메인 이미지 (리사이즈 적용)
+  if (previewImageUrl) {
+    const blob = base64ToBlob(previewImageUrl);
+    const resizedBlob = await resizeImage(blob, 800); // 최대 800px
+    const file = new File([resizedBlob], "cropped.jpg", { type: "image/jpeg" });
+    form.append("productImage", file);
+  }
 
-    // ✅ 사용자가 직접 업로드한 이미지 파일
-    if (productImageFile) {
-      form.append("productImage", productImageFile);
-    }
-
-    // ✅ 재료 이미지도 필요하면 동일하게 처리
-    if (previewIngredientsImageUrl && !ingredientsImageFile) {
-      const blob = base64ToBlob(previewIngredientsImageUrl);
-      const file = new File([blob], "ingredients.jpg", { type: "image/jpeg" });
-      form.append("ingredientsImage", file);
-    }
-
-    if (ingredientsImageFile) {
-      form.append("ingredientsImage", ingredientsImageFile);
-    }
+  // ✅ 크롭된 재료 이미지 (리사이즈 적용)
+  if (previewIngredientsImageUrl) {
+    const blob = base64ToBlob(previewIngredientsImageUrl);
+    const resizedBlob = await resizeImage(blob, 800); // 최대 800px
+    const file = new File([resizedBlob], "ingredients.jpg", { type: "image/jpeg" });
+    form.append("ingredientsImage", file);
+  }
 
     try {
       if (id) {
