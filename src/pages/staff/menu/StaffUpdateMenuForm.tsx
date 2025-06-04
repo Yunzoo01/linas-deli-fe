@@ -189,6 +189,19 @@ const StaffUpdateMenuForm = () => {
   }
 };
 
+const handleDelete = async () => {
+  if (confirm("❗ Are you sure you want to delete this item?")) {
+    try {
+      await api.delete(`/api/staff/products/${id}`);
+      alert("🗑️ Deleted successfully!");
+      navigate("/staff/menu");
+    } catch (err) {
+      console.error("❌ Failed to delete:", err);
+      alert("Failed to delete the product.");
+    }
+  }
+};
+
   return (
     <>
       <StaffPageBanner title="Menu" />
@@ -494,15 +507,23 @@ const StaffUpdateMenuForm = () => {
             />
           </div>
 
-          <div className="flex justify-end">
-            <button
-              onClick={handleSave}
-              type="button"
-              className="bg-[#AD343E] text-white px-4 py-2 rounded-md text-sm"
-            >
-              Save
-            </button>
-          </div>
+          <div className="flex justify-between">
+  <button
+    onClick={handleDelete}
+    type="button"
+    className="bg-gray-300 text-black px-4 py-2 rounded-md text-sm"
+  >
+    Delete
+  </button>
+
+  <button
+    onClick={handleSave}
+    type="button"
+    className="bg-[#AD343E] text-white px-4 py-2 rounded-md text-sm"
+  >
+    Save
+  </button>
+</div>
         </div>
       </form>
     </>
