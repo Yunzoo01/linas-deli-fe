@@ -297,8 +297,9 @@ const StaffAddMenuForm = () => {
           </div>
 
           {/* Row 1: Image, Product Name, Supplier */}
-          <div className="flex gap-6 mb-4">
-            <div className="w-36 h-36 rounded flex flex-col items-start justify-center">
+          <div className="flex flex-col lg:flex-row gap-6 mb-4">
+            {/* Image Section */}
+            <div className="w-36 h-36 rounded flex flex-col items-start justify-center mx-auto lg:mx-0">
               {previewImageUrl ? (
                 <img
                   src={previewImageUrl}
@@ -323,7 +324,6 @@ const StaffAddMenuForm = () => {
               >
                 image upload
               </label>
-              {/* ✅ 여기에 크롭 모달 삽입 */}
               {showCropModal && uploadedImage && (
                 <CropModal
                   imageSrc={uploadedImage}
@@ -335,14 +335,19 @@ const StaffAddMenuForm = () => {
               )}
             </div>
 
-            <div className="flex-1 grid grid-cols-2 gap-4 items-center">
-              <input
-                type="text"
-                className={`w-full px-2 py-1 rounded-md text-sm border ${errors.productName ? "border-red-500" : "border-gray-300"
-                  }`}
-                value={productName}
-                onChange={(e) => setProductName(e.target.value)}
-              />
+            {/* Product Name + Supplier Section */}
+            <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 items-center">
+              {/* ✅ Product Name */}
+              <div>
+                <label className="block text-sm font-semibold mb-1">Product Name</label>
+                <input
+                  type="text"
+                  className={`w-full px-2 py-1 rounded-md text-sm border ${errors.productName ? "border-red-500" : "border-gray-300"
+                    }`}
+                  value={productName}
+                  onChange={(e) => setProductName(e.target.value)}
+                />
+              </div>
               <div>
                 <label className="block text-sm font-semibold mb-1">Supplier</label>
                 <select
@@ -377,7 +382,7 @@ const StaffAddMenuForm = () => {
                   checked={priceType === "W"}
                   onChange={() => setPriceType("W")}
                 />
-                Whole Wheel
+                Whole Unit
               </label>
 
               <label>
@@ -397,7 +402,7 @@ const StaffAddMenuForm = () => {
           <div className="mb-4 flex flex-col lg:flex-row">
             <div className="flex-1 mr-4">
               <div className="flex flex-col md:flex-row items-start md:items-center mb-2">
-                <label className="text-sm mr-3 w-[75px]">Cost / Kg</label>
+                <label className="text-sm mr-3 w-[110px]">Cost price / kg</label>
                 <input
                   type="text"
                   className={`w-full lg:w-[200px] px-2 py-1 rounded-md text-sm border ${errors.supplierPrice ? "border-red-500" : "border-gray-300"
@@ -408,7 +413,7 @@ const StaffAddMenuForm = () => {
               </div>
 
               <div className="flex flex-col md:flex-row items-start md:items-center mb-2">
-                <label className="text-sm mr-3 w-[75px]">Sale price</label>
+                <label className="text-sm mr-3 w-[110px]">Selling price</label>
                 <input
                   type="text"
                   className={`w-full lg:w-[200px] px-2 py-1 rounded-md text-sm border ${errors.salePrice ? "border-red-500" : "border-gray-300"
@@ -420,7 +425,7 @@ const StaffAddMenuForm = () => {
 
               {priceType === "W" && (
                 <div className="flex flex-col md:flex-row items-start md:items-center mb-2">
-                  <label className="text-sm mr-3 w-[75px]">PLU</label>
+                  <label className="text-sm mr-3 w-[110px]">PLU</label>
                   <input
                     type="text"
                     className={`w-full lg:w-[200px] px-2 py-1 rounded-md text-sm border ${errors.plu ? "border-red-500" : "border-gray-300"
