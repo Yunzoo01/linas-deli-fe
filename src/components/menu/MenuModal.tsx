@@ -12,7 +12,6 @@ interface Props {
 const MenuModal = ({ isOpen, onClose, menuItem }: Props) => {
   if (!menuItem) return null;
 
-  // 재사용 가능한 알러지 마크 렌더링
   const renderAllergyMarks = () => {
     if (!menuItem.allergies || menuItem.allergies.length === 0) return null;
 
@@ -21,13 +20,13 @@ const MenuModal = ({ isOpen, onClose, menuItem }: Props) => {
         {menuItem.allergies.includes("G") && (
           <div className="flex items-center gap-1">
             <img src="/Icon/allergy/icon_glutenfree.png" alt="GlutenFree" className="w-6 h-6" />
-            <span className="text-sm text-gray-600">Gluten Free</span>
+            <span className="text-sm text-gray-600 hidden lg:block">Gluten Free</span>
           </div>
         )}
         {menuItem.allergies.includes("L") && (
           <div className="flex items-center gap-1">
             <img src="/Icon/allergy/icon_lactosefree.png" alt="LactoseFree" className="w-6 h-6" />
-            <span className="text-sm text-gray-600">Lactose Free</span>
+            <span className="text-sm text-gray-600 hidden lg:block">Lactose Free</span>
           </div>
         )}
       </div>
@@ -37,10 +36,10 @@ const MenuModal = ({ isOpen, onClose, menuItem }: Props) => {
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
-        {/* Background Overlay */}
+        {/* Overlay */}
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
 
-        {/* Modal Box */}
+        {/* Modal */}
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <Transition.Child
             as={Fragment}
@@ -51,18 +50,24 @@ const MenuModal = ({ isOpen, onClose, menuItem }: Props) => {
             leaveFrom="opacity-100 scale-100"
             leaveTo="opacity-0 scale-95"
           >
-            <Dialog.Panel className="w-full max-w-3xl bg-white rounded-2xl shadow-xl overflow-hidden">
+            <Dialog.Panel className="w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-white rounded-2xl shadow-xl">
               {/* Header */}
               <div className="flex justify-between items-center px-6 py-4 border-b">
                 <Dialog.Title className="text-xl font-bold flex items-center gap-3">
                   <span>{menuItem.productName}</span>
-                  <img
-                    src={`/Icon/flag/flag_${menuItem.countryName}.png`}
-                    alt={menuItem.countryName}
-                    className="w-6 h-4 object-cover shadow-sm"
-                  />
+
+                  {/* ✅ Others가 아닐 때만 국기 표시 */}
+                  {menuItem.categoryName !== "Others" && (
+                    <img
+                      src={`/Icon/flag/flag_${menuItem.countryName}.png`}
+                      alt={menuItem.countryName}
+                      className="w-6 h-4 object-cover shadow-sm"
+                    />
+                  )}
+
                   {renderAllergyMarks()}
                 </Dialog.Title>
+
                 <button onClick={onClose} className="text-gray-500 hover:text-black">
                   <X size={20} />
                 </button>
@@ -81,13 +86,19 @@ const MenuModal = ({ isOpen, onClose, menuItem }: Props) => {
                     <p className="text-gray-700">{menuItem.servingSuggestion}</p>
                   </div>
 
-                  <div>
-                    <h3 className="text-sm font-semibold text-gray-500 uppercase mb-1 underline">Details</h3>
-                    <p className="text-gray-700">
-                      {menuItem.pasteurized ? "Pasteurized" : "Unpasteurized"},{" "}
-                      {menuItem.animalName} milk
-                    </p>
-                  </div>
+                  {/* ✅ Others 제외한 경우에만 Details 출력 */}
+                  {menuItem.categoryName !== "Others" && (
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-500 uppercase mb-1 underline">Details</h3>
+                      <p className="text-gray-700">
+                        {menuItem.categoryName === "Meat"
+                          ? `${menuItem.animalName} meat`
+                          : menuItem.categoryName === "Bulk"
+                            ? `${menuItem.animalName}`
+                            : `${menuItem.pasteurized ? "Pasteurized" : "Unpasteurized"}, ${menuItem.animalName} milk`}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 {/* 재료 이미지 */}

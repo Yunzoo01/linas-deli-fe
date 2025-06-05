@@ -37,6 +37,8 @@ export interface MenuItem {
   country: Country;
   animal: Animal;
   allergies?: string[];
+  categoryId: number;
+  categoryName: string; 
 }
 // src/types.ts
 export interface Promotion {
