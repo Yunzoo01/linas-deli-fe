@@ -9,6 +9,8 @@ import heic2any from "heic2any";
 import { resizeImage } from "../../../components/staff/utils/resizeImage";
 
 const StaffAddMenuForm = () => {
+  const [isLoading, setIsLoading] = useState(false);
+
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [showCropModal, setShowCropModal] = useState(false);
 
@@ -123,6 +125,7 @@ const StaffAddMenuForm = () => {
   const handleSave = async () => {
     const newErrors: { [key: string]: boolean } = {};
 
+
     if (!productName.trim()) newErrors.productName = true;
     if (!selectedCategoryId) newErrors.categoryId = true;
     if (!selectedSupplierId) newErrors.supplierId = true;
@@ -172,22 +175,25 @@ const StaffAddMenuForm = () => {
       form.append("pasteurized", String(pasteurized));
     }
 
-   // ✅ 크롭된 메인 이미지 (리사이즈 적용)
-  if (previewImageUrl) {
-    const blob = base64ToBlob(previewImageUrl);
-    const resizedBlob = await resizeImage(blob, 800); // 최대 800px
-    const file = new File([resizedBlob], "cropped.jpg", { type: "image/jpeg" });
-    form.append("productImage", file);
-  }
+    // ✅ 크롭된 메인 이미지 (리사이즈 적용)
+    if (previewImageUrl) {
+      const blob = base64ToBlob(previewImageUrl);
+      const tempFile = new File([blob], "temp.jpg", { type: "image/jpeg" });
+      const resizedBlob = await resizeImage(tempFile, 800);
+      const resizedFile = new File([resizedBlob], "cropped.jpg", { type: "image/jpeg" });
+      form.append("productImage", resizedFile);
+    }
 
-  // ✅ 크롭된 재료 이미지 (리사이즈 적용)
-  if (previewIngredientsImageUrl) {
-    const blob = base64ToBlob(previewIngredientsImageUrl);
-    const resizedBlob = await resizeImage(blob, 800); // 최대 800px
-    const file = new File([resizedBlob], "ingredients.jpg", { type: "image/jpeg" });
-    form.append("ingredientsImage", file);
-  }
+    // ✅ 크롭된 재료 이미지 (리사이즈 적용)
+    if (previewIngredientsImageUrl) {
+      const blob = base64ToBlob(previewIngredientsImageUrl);
+      const tempFile = new File([blob], "temp.jpg", { type: "image/jpeg" });
+      const resizedBlob = await resizeImage(tempFile, 800);
+      const file = new File([resizedBlob], "ingredients.jpg", { type: "image/jpeg" });
+      form.append("ingredientsImage", file);
+    }
 
+    setIsLoading(true);
     try {
       if (id) {
         form.append("pid", id);
@@ -204,12 +210,16 @@ const StaffAddMenuForm = () => {
       navigate("/staff/menu");
     } catch (err) {
       console.error("❌ Failed to save product:", err);
+    }finally{
+      setIsLoading(false);
     }
   };
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    setIsLoading(true); // ✅ 로딩 시작
 
     let imageFile = file;
 
@@ -222,9 +232,9 @@ const StaffAddMenuForm = () => {
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      const base64 = reader.result as string;
-      setUploadedImage(base64);       // ✅ 크롭용 원본 이미지 저장
-      setShowCropModal(true);         // ✅ 모달 열기
+      setUploadedImage(reader.result as string);
+      setShowCropModal(true);
+      setIsLoading(false); // ✅ 로딩 끝
     };
     reader.readAsDataURL(imageFile);
   };
@@ -233,9 +243,11 @@ const StaffAddMenuForm = () => {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    setIsLoading(true); // 로딩 시작 (선택사항)
+
     let imageFile = file;
 
-    // HEIC → JPEG 변환
+    // ✅ HEIC → JPEG 변환
     if (file.name.toLowerCase().endsWith(".heic") || file.type === "image/heic") {
       try {
         const convertedBlob = await heic2any({ blob: file, toType: "image/jpeg" });
@@ -244,18 +256,21 @@ const StaffAddMenuForm = () => {
         });
       } catch (error) {
         console.error("HEIC 변환 실패:", error);
+        alert("HEIC 이미지를 변환할 수 없습니다.");
+        setIsLoading(false);
         return;
       }
     }
 
-    // 최종 파일 저장
+    // ✅ 최종 파일 저장 (크롭 후 업로드용으로 사용)
     setIngredientsImageFile(imageFile);
 
-    // base64 → 미리보기 및 크롭 모달
+    // ✅ base64 → 미리보기 및 크롭 모달
     const reader = new FileReader();
     reader.onloadend = () => {
       setUploadedIngredientsImage(reader.result as string);  // base64 저장
-      setShowIngredientsCropModal(true);                    // 크롭 모달 열기
+      setShowIngredientsCropModal(true);                     // 크롭 모달 열기
+      setIsLoading(false);                              // 로딩 끝
     };
     reader.readAsDataURL(imageFile);
   };
@@ -500,7 +515,7 @@ const StaffAddMenuForm = () => {
             {/* Ingredients 이미지 업로드 */}
             <div>
               <label className="block text-sm font-semibold mb-1">Ingredients</label>
-              <div className={`w-36 h-28 rounded mb-2 flex items-center justify-center ${errors.ingredientsImage ? "border-2 border-red-500" : "bg-gray-200"}`}>
+              <div className={`w-36 h-36 rounded mb-2 flex items-center justify-center ${errors.ingredientsImage ? "border-2 border-red-500" : "bg-gray-200"}`}>
                 {previewIngredientsImageUrl ? (
                   <img
                     src={previewIngredientsImageUrl}
@@ -613,6 +628,12 @@ const StaffAddMenuForm = () => {
             </button>
           </div>
         </div>
+        {isLoading && (
+            <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+    <span className="text-white text-xl font-semibold animate-pulse">Loading...</span>
+  </div>
+        )}
+
       </form >
     </>
   );
