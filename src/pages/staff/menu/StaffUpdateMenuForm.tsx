@@ -1,10 +1,29 @@
+// ✅ StaffUpdateMenuForm with image cropping, loading, and shared logic
 import { useEffect, useState } from "react";
 import api from "@/api/axios";
 import StaffPageBanner from "@/components/staff/StaffPageBanner";
+import CropModal from "@/components/staff/CropModal";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { ProductFormResponseDTO, SupplierDTO, CategoryDTO, AnimalDTO, CountryDTO } from "@/type";
+import { base64ToBlob } from "@/components/staff/utils/base64ToBlob";
+import { resizeImage } from "@/components/staff/utils/resizeImage";
+import heic2any from "heic2any";
+import {
+  ProductFormResponseDTO,
+  SupplierDTO,
+  CategoryDTO,
+  AnimalDTO,
+  CountryDTO,
+} from "@/type";
 
 const StaffUpdateMenuForm = () => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [showCropModal, setShowCropModal] = useState(false);
+
+  const [uploadedIngredientsImage, setUploadedIngredientsImage] = useState<string | null>(null);
+  const [showIngredientsCropModal, setShowIngredientsCropModal] = useState(false);
+
   const [searchParams] = useSearchParams();
   const id = searchParams.get("id");
   const navigate = useNavigate();
@@ -30,26 +49,38 @@ const StaffUpdateMenuForm = () => {
   const [glutenFreeChecked, setGlutenFreeChecked] = useState(false);
   const [lactoseFreeChecked, setLactoseFreeChecked] = useState(false);
 
-  const [productImageFile, setProductImageFile] = useState<File | null>(null);
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+  const [productImageFile, setProductImageFile] = useState<File | null>(null);
 
-  const [ingredientsImageFile, setIngredientsImageFile] = useState<File | null>(null);
   const [previewIngredientsImageUrl, setPreviewIngredientsImageUrl] = useState<string | null>(null);
+  const [ingredientsImageFile, setIngredientsImageFile] = useState<File | null>(null);
 
   const [description, setDescription] = useState("");
   const [suggestion, setSuggestion] = useState("");
 
-  const allergies: ("G" | "L")[] = [];
-  if (glutenFreeChecked) allergies.push("G");
-  if (lactoseFreeChecked) allergies.push("L");
+  const [errors, setErrors] = useState<{ [key: string]: boolean }>({});
+
+  // 예: 카테고리 이름 기준으로 분기 (categoryId -> categoryName 매핑이 가능할 때)
+  const selectedCategory = categories.find(c => c.categoryId === selectedCategoryId);
+  const isMeat = selectedCategory?.categoryName === "Meat";
+  const isOther = selectedCategory?.categoryName === "Others";
+  const isBulk = selectedCategory?.categoryName === "Bulk";
+
+  const handleCheckboxChange = (type: "glutenFree" | "lactoseFree") => {
+    if (type === "glutenFree") {
+      setGlutenFreeChecked((prev) => !prev);
+    } else if (type === "lactoseFree") {
+      setLactoseFreeChecked((prev) => !prev);
+    }
+  };
 
   useEffect(() => {
     if (id) fetchProductForm(Number(id));
+    fetchInitialData();
   }, [id]);
 
   useEffect(() => {
     if (formData) {
-      // console.log("✅ previewImageUrl:", formData.productImageUrl);
       setProductName(formData.productName);
       setSelectedCategoryId(formData.categoryId);
       setSelectedSupplierId(formData.supplierId);
@@ -58,7 +89,7 @@ const StaffUpdateMenuForm = () => {
       setPriceType(formData.priceType as "W" | "U");
       setSupplierPrice(formData.supplierPrice.toString());
       setSalePrice(formData.salePrice.toString());
-      setPlu(formData.plu !== null && formData.plu !== undefined ? formData.plu.toString() : "");
+      setPlu(formData.plu?.toString() ?? "");
       setPasteurized(formData.pasteurized);
       setGlutenFreeChecked(formData.allergies.includes("G"));
       setLactoseFreeChecked(formData.allergies.includes("L"));
@@ -95,112 +126,143 @@ const StaffUpdateMenuForm = () => {
     }
   };
 
-  useEffect(() => {
-    fetchInitialData();
-  }, []);
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setProductImageFile(file); // 파일 저장
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (reader.result) {
-          setPreviewImageUrl(reader.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
+    setIsLoading(true);
+    let imageFile = file;
+
+    if (file.name.endsWith(".heic") || file.type === "image/heic") {
+      const convertedBlob = await heic2any({ blob: file, toType: "image/jpeg" });
+      imageFile = new File([convertedBlob as BlobPart], file.name + ".jpg", { type: "image/jpeg" });
     }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setUploadedImage(reader.result as string);
+      setShowCropModal(true);
+      setIsLoading(false);
+    };
+    reader.readAsDataURL(imageFile);
   };
 
-  const handleIngredientsImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleIngredientsImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
-      setIngredientsImageFile(file); // 파일 저장
+    if (!file) return;
 
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        // ✅ URL 잘 들어오는지 꼭 확인!
-        if (reader.result) {
-          setPreviewIngredientsImageUrl(reader.result as string);
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+    setIsLoading(true);
+    let imageFile = file;
 
-  const handleCheckboxChange = (id: string) => {
-    switch (id) {
-      case "glutenFree":
-        setGlutenFreeChecked(!glutenFreeChecked);
-        break;
-      case "lactoseFree":
-        setLactoseFreeChecked(!lactoseFreeChecked);
-        break;
+    if (file.name.toLowerCase().endsWith(".heic") || file.type === "image/heic") {
+      try {
+        const convertedBlob = await heic2any({ blob: file, toType: "image/jpeg" });
+        imageFile = new File([convertedBlob as BlobPart], file.name + ".jpg", {
+          type: "image/jpeg",
+        });
+      } catch (error) {
+        console.error("HEIC 변환 실패:", error);
+        alert("HEIC 이미지를 변환할 수 없습니다.");
+        setIsLoading(false);
+        return;
+      }
     }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setUploadedIngredientsImage(reader.result as string);
+      setShowIngredientsCropModal(true);
+      setIsLoading(false);
+    };
+    reader.readAsDataURL(imageFile);
   };
 
   const handleSave = async () => {
-  const form = new FormData();
-  form.append("categoryId", String(selectedCategoryId!));
-  form.append("productName", productName);
-  form.append("supplierId", String(selectedSupplierId!));
-  form.append("priceType", priceType);
-  form.append("supplierPrice", supplierPrice);
-  form.append("salePrice", salePrice);
-  form.append("plu", plu);
-  form.append("animalId", String(selectedAnimalId!));
-  form.append("pasteurized", String(pasteurized));
-  form.append("originId", String(selectedCountryId!));
-  form.append("description", description);
-  form.append("suggestion", suggestion);
+    const newErrors: { [key: string]: boolean } = {};
 
-  const allergyList = [];
-  if (glutenFreeChecked) allergyList.push("G");
-  if (lactoseFreeChecked) allergyList.push("L");
 
-  // ✅ 하나씩 append 해줘야 Spring에서 List<Enum> 파싱 가능
-  for (const allergy of allergyList) {
-    form.append("allergies", allergy);
-  }
+    if (!productName.trim()) newErrors.productName = true;
+    if (!selectedCategoryId) newErrors.categoryId = true;
+    if (!selectedSupplierId) newErrors.supplierId = true;
+    if (!isOther && !selectedAnimalId) newErrors.animalId = true;
+    if (!isOther && !selectedCountryId) newErrors.countryId = true;
 
-  if (productImageFile) form.append("productImage", productImageFile);
-  if (ingredientsImageFile) form.append("ingredientsImage", ingredientsImageFile);
+    if (!supplierPrice.trim()) newErrors.supplierPrice = true;
+    if (!salePrice.trim()) newErrors.salePrice = true;
+    if (priceType === "W" && !plu.trim()) newErrors.plu = true;
 
-  try {
-    if (id) {
-      // 수정
-      form.append("pid", id);
+    if (!description.trim()) newErrors.description = true;
+    if (!suggestion.trim()) newErrors.suggestion = true;
+
+    // if (!productImageFile && !previewImageUrl) newErrors.productImage = true;
+    // if (!ingredientsImageFile && !previewIngredientsImageUrl) newErrors.ingredientsImage = true;
+
+    setErrors(newErrors);
+    const form = new FormData();
+    form.append("pid", String(id));
+    form.append("categoryId", String(selectedCategoryId!));
+    form.append("productName", productName);
+    form.append("supplierId", String(selectedSupplierId!));
+    form.append("priceType", priceType);
+    form.append("supplierPrice", supplierPrice);
+    form.append("salePrice", salePrice);
+    form.append("plu", plu);
+    form.append("animalId", String(selectedAnimalId!));
+    form.append("pasteurized", String(pasteurized));
+    form.append("originId", String(selectedCountryId!));
+    form.append("description", description);
+    form.append("suggestion", suggestion);
+
+    if (glutenFreeChecked) form.append("allergies", "G");
+    if (lactoseFreeChecked) form.append("allergies", "L");
+
+    // ✅ productImage가 base64라면 새로 업로드된 이미지로 간주
+    if (previewImageUrl && previewImageUrl.startsWith("data:image")) {
+      const blob = base64ToBlob(previewImageUrl);
+      const tempFile = new File([blob], "temp.jpg", { type: "image/jpeg" });
+      const resizedBlob = await resizeImage(tempFile, 800);
+      const resizedFile = new File([resizedBlob], "cropped.jpg", { type: "image/jpeg" });
+      form.append("productImage", resizedFile);
+    }
+
+    // ✅ ingredientsImage도 마찬가지
+    if (previewIngredientsImageUrl && previewIngredientsImageUrl.startsWith("data:image")) {
+      const blob = base64ToBlob(previewIngredientsImageUrl);
+      const tempFile = new File([blob], "temp.jpg", { type: "image/jpeg" });
+      const resizedBlob = await resizeImage(tempFile, 800);
+      const resizedFile = new File([resizedBlob], "ingredients.jpg", { type: "image/jpeg" });
+      form.append("ingredientsImage", resizedFile);
+    }
+
+    try {
+      setIsLoading(true);
       await api.put(`/api/staff/products/${id}`, form, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       alert("✅ Product updated successfully!");
       navigate("/staff/menu");
-    } else {
-      // 등록
-      await api.post("/api/staff/products", form, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      alert("✅ Product added successfully!");
-      navigate("/staff/menu"); // ✅ 등록 후에도 이동 추가
-    }
-  } catch (err) {
-    console.error("❌ Failed to save product:", err);
-  }
-};
-
-const handleDelete = async () => {
-  if (confirm("❗ Are you sure you want to delete this item?")) {
-    try {
-      await api.delete(`/api/staff/products/${id}`);
-      alert("🗑️ Deleted successfully!");
-      navigate("/staff/menu");
     } catch (err) {
-      console.error("❌ Failed to delete:", err);
-      alert("Failed to delete the product.");
+      console.error("❌ Failed to update product:", err);
+    } finally {
+      setIsLoading(false);
     }
-  }
-};
+  };
+
+  const handleDelete = async () => {
+    if (confirm("❗ Are you sure you want to delete this item?")) {
+      setIsLoading(true);
+      try {
+        await api.delete(`/api/staff/products/${id}`);
+        alert("🗑️ Deleted successfully!");
+        navigate("/staff/menu");
+      } catch (err) {
+        console.error("❌ Failed to delete:", err);
+        alert("Failed to delete the product.");
+      } finally{
+        setIsLoading(false);
+      }
+    }
+  };
 
   return (
     <>
@@ -212,6 +274,8 @@ const handleDelete = async () => {
             <div className="flex">
 
               <select
+                className={`w-full px-2 py-1 rounded-md text-sm border ${errors.categoryId ? "border-red-500" : "border-gray-300"
+                  }`}
                 value={selectedCategoryId !== null ? String(selectedCategoryId) : ""}
                 onChange={(e) => {
                   const value = e.target.value;
@@ -230,8 +294,8 @@ const handleDelete = async () => {
           </div>
 
           {/* Row 1: Image, Product Name, Supplier */}
-          <div className="flex gap-6 mb-4">
-            <div className="w-36 h-36 rounded flex flex-col items-start justify-center">
+          <div className="flex flex-col lg:flex-row gap-6 mb-4">
+            <div className="w-36 h-36 rounded flex flex-col items-start justify-center mx-auto lg:mx-0">
               {previewImageUrl ? (
                 <img
                   src={
@@ -261,17 +325,35 @@ const handleDelete = async () => {
               >
                 image upload
               </label>
+              {showCropModal && uploadedImage && (
+                <CropModal
+                  imageSrc={uploadedImage}
+                  onClose={() => setShowCropModal(false)}
+                  onCropDone={(croppedImage) => {
+                    setPreviewImageUrl(croppedImage);
+                  }}
+                />
+              )}
             </div>
-            <div className="flex-1 grid grid-cols-2 gap-4 items-center">
-              <input
-                type="text"
-                className="w-full border border-gray-300 px-2 py-1 rounded-md text-sm"
-                value={productName}
-                onChange={(e) => setProductName(e.target.value)}
-              />
+
+            {/* Product Name + Supplier Section */}
+            <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4 items-center">
+              {/* ✅ Product Name */}
+              <div>
+                <label className="block text-sm font-semibold mb-1">Product Name</label>
+                <input
+                  type="text"
+                  className={`w-full px-2 py-1 rounded-md text-sm border ${errors.productName ? "border-red-500" : "border-gray-300"}`}
+                  value={productName}
+                  onChange={(e) => setProductName(e.target.value)}
+                />
+              </div>
+
+              {/* ✅ Supplier */}
               <div>
                 <label className="block text-sm font-semibold mb-1">Supplier</label>
                 <select
+                  className={`w-full px-2 py-1 rounded-md text-sm border ${errors.supplierId ? "border-red-500" : "border-gray-300"}`}
                   value={selectedSupplierId !== null ? String(selectedSupplierId) : ""}
                   onChange={(e) => {
                     const id = e.target.value === "" ? null : Number(e.target.value);
@@ -285,7 +367,6 @@ const handleDelete = async () => {
                     </option>
                   ))}
                 </select>
-
               </div>
             </div>
           </div>
@@ -294,29 +375,29 @@ const handleDelete = async () => {
           <div className="flex mb-4 items-center">
             <label className="block text-sm font-semibold mb-1 mr-3">Price Type</label>
             <div className="flex gap-3">
-              <div className="flex gap-3">
-                <label>
-                  <input
-                    type="radio"
-                    name="priceType"
-                    value="W"
-                    checked={priceType === "W"}
-                    onChange={() => setPriceType("W")}
-                  />
-                  Whole Wheel
-                </label>
 
-                <label>
-                  <input
-                    type="radio"
-                    name="priceType"
-                    value="U"
-                    checked={priceType === "U"}
-                    onChange={() => setPriceType("U")}
-                  />
-                  Pre-Pack
-                </label>
-              </div>
+              <label>
+                <input
+                  type="radio"
+                  name="priceType"
+                  value="W"
+                  checked={priceType === "W"}
+                  onChange={() => setPriceType("W")}
+                />
+                Whole Unit
+              </label>
+
+              <label>
+                <input
+                  type="radio"
+                  name="priceType"
+                  value="U"
+                  checked={priceType === "U"}
+                  onChange={() => setPriceType("U")}
+                />
+                Pre-Pack
+              </label>
+
             </div>
           </div>
 
@@ -324,98 +405,111 @@ const handleDelete = async () => {
           <div className="mb-4 flex flex-col lg:flex-row">
             <div className="flex-1 mr-4">
               <div className="flex flex-col md:flex-row item-start md:items-center mb-2">
-                <label className="text-sm mr-3 w-[75px]">Cost / Kg</label>
+                <label className="text-sm mr-3 w-[110px]">Cost price / kg</label>
                 <input
                   type="text"
-                  className="w-full lg:w-[200px] border border-gray-300 px-2 py-1 rounded-md text-sm"
+                  className={`w-full lg:w-[200px] px-2 py-1 rounded-md text-sm border ${errors.supplierPrice ? "border-red-500" : "border-gray-300"
+                    }`}
                   value={supplierPrice}
                   onChange={(e) => setSupplierPrice(e.target.value)}
                 />
               </div>
-              <div className="flex flex-col md:flex-row item-start md:items-center mb-2">
-                <label className="text-sm mr-3 w-[75px]">Sale price</label>
+              <div className="flex flex-col md:flex-row items-start md:items-center mb-2">
+                <label className="text-sm mr-3 w-[110px]">Selling price</label>
                 <input
                   type="text"
-                  className="w-full lg:w-[200px] border border-gray-300 px-2 py-1 rounded-md text-sm"
+                  className={`w-full lg:w-[200px] px-2 py-1 rounded-md text-sm border ${errors.salePrice ? "border-red-500" : "border-gray-300"
+                    }`}
                   value={salePrice}
                   onChange={(e) => setSalePrice(e.target.value)}
                 />
               </div>
+
               {priceType === "W" && (
-                <div className="flex flex-col md:flex-row item-start md:items-center mb-2">
-                  <label className="text-sm mr-3 w-[75px]">PLU</label>
+                <div className="flex flex-col md:flex-row items-start md:items-center mb-2">
+                  <label className="text-sm mr-3 w-[110px]">PLU</label>
                   <input
                     type="text"
-                    className="w-full lg:w-[200px] border border-gray-300 px-2 py-1 rounded-md text-sm"
+                    className={`w-full lg:w-[200px] px-2 py-1 rounded-md text-sm border ${errors.plu ? "border-red-500" : "border-gray-300"
+                      }`}
                     value={plu}
                     onChange={(e) => setPlu(e.target.value)}
                   />
-                </div>)}
+                </div>
+              )}
             </div>
+
+
             <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-x-4 gap-y-2">
-              <div>
-                <label className="block text-sm font-semibold mb-1">Source Animal</label>
-                <select
-                  value={selectedAnimalId !== null ? String(selectedAnimalId) : ""}
-                  onChange={(e) => {
-                    const id = e.target.value === "" ? null : Number(e.target.value);
-                    setSelectedAnimalId(id);
-                  }}
-                >
-                  <option value="">Select Animal</option>
-                  {animals
-                    .filter((animal) => {
+              {!isOther && (
+                <div>
+                  <label className="block text-sm font-semibold mb-1">Source Animal</label>
+                  <select
+                    className={`w-full px-2 py-1 rounded-md text-sm border ${errors.animalId ? "border-red-500" : "border-gray-300"}`}
+                    value={selectedAnimalId !== null ? String(selectedAnimalId) : ""}
+                    onChange={(e) => {
+                      const id = e.target.value === "" ? null : Number(e.target.value);
+                      setSelectedAnimalId(id);
+                    }}
+                  >
+                    <option value="">Select Animal</option>
+                    {(isBulk ? animals : animals.filter((animal) => {
                       if (selectedCategoryId === 2) {
-                        // ✅ Cheese일 때 (categoryId === 2) → animalId 1~5만
                         return animal.animalId >= 1 && animal.animalId <= 5;
                       } else {
-                        // ✅ Cheese 외 카테고리 → animalId 6 이상만
-                        return animal.animalId >= 6 || animal.animalId == 4;
+                        return animal.animalId >= 6 || animal.animalId === 4;
                       }
-                    })
-                    .map((animal) => (
+                    })).map((animal) => (
                       <option key={animal.animalId} value={String(animal.animalId)}>
                         {animal.animalName}
                       </option>
                     ))}
-                </select>
-              </div>
+                  </select>
+                </div>
+              )}
 
-              <div className="flex items-center gap-3">
-                <label className="text-sm font-semibold">Pasteurized</label>
-                <input
-                  type="checkbox"
-                  checked={pasteurized}
-                  onChange={() => setPasteurized(!pasteurized)}
-                  className="w-4 h-4"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold mb-1">Country of Origin</label>
-                <select
-                  value={selectedCountryId !== null ? String(selectedCountryId) : ""}
-                  onChange={(e) => {
-                    const id = e.target.value === "" ? null : Number(e.target.value);
-                    setSelectedCountryId(id);
-                  }}
-                >
-                  <option value="">Select Country</option>
-                  {countries.map((country) => (
-                    <option key={country.countryId} value={String(country.countryId)}>
-                      {country.countryName}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {!isMeat && !isOther && (
+                <div className="flex items-center gap-3">
+                  <label className="text-sm font-semibold">Pasteurized</label>
+                  <input
+                    type="checkbox"
+                    checked={pasteurized}
+                    onChange={() => setPasteurized(!pasteurized)}
+                    className="w-4 h-4"
+                  />
+                </div>
+              )}
+
+              {!isOther && (
+                <div>
+                  <label className="block text-sm font-semibold mb-1">Country of Origin</label>
+                  <select
+                    className={`w-full px-2 py-1 rounded-md text-sm border ${errors.countryId ? "border-red-500" : "border-gray-300"}`}
+                    value={selectedCountryId !== null ? String(selectedCountryId) : ""}
+                    onChange={(e) => {
+                      const id = e.target.value === "" ? null : Number(e.target.value);
+                      setSelectedCountryId(id);
+                    }}
+                  >
+                    <option value="">Select Country</option>
+                    {countries.map((country) => (
+                      <option key={country.countryId} value={String(country.countryId)}>
+                        {country.countryName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
           </div>
+
 
           {/* Row 4: Ingredients and Allergy Mark */}
           <div className="flex gap-6 mb-6 items-start justify-between">
             {/* Ingredients 이미지 업로드 */}
             <div>
               <label className="block text-sm font-semibold mb-1">Ingredients</label>
-              <div className="w-36 h-28 bg-gray-200 rounded mb-2 flex items-center justify-center">
+              <div className="w-36 h-36 bg-gray-200 rounded mb-2 flex items-center justify-center">
                 {previewIngredientsImageUrl ? (
                   <img
                     src={
@@ -445,6 +539,18 @@ const handleDelete = async () => {
               >
                 image upload
               </label>
+              {showIngredientsCropModal && uploadedIngredientsImage && (
+                <CropModal
+                  imageSrc={uploadedIngredientsImage}
+                  onClose={() => setShowIngredientsCropModal(false)}
+                  onCropDone={(croppedImage) => {
+                    setPreviewIngredientsImageUrl(croppedImage); // 미리보기용
+                    const blob = base64ToBlob(croppedImage);     // 네 함수로 Blob 생성
+                    const file = new File([blob], "ingredients.jpg", { type: "image/jpeg" });
+                    setIngredientsImageFile(file);               // 전송용 파일로 저장
+                  }}
+                />
+              )}
             </div>
 
             {/* 알러지 체크박스 */}
@@ -489,7 +595,7 @@ const handleDelete = async () => {
           <div className="mb-4">
             <label className="block text-sm font-semibold mb-1">Product Description</label>
             <textarea
-              className="w-full border border-gray-300 px-2 py-1 rounded-md text-sm"
+              className={`w-full border px-2 py-1 rounded-md text-sm ${errors.description ? "border-red-500" : "border-gray-300"}`}
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -500,7 +606,7 @@ const handleDelete = async () => {
           <div className="mb-6">
             <label className="block text-sm font-semibold mb-1">Serving suggestion</label>
             <textarea
-              className="w-full border border-gray-300 px-2 py-1 rounded-md text-sm"
+              className={`w-full border px-2 py-1 rounded-md text-sm ${errors.suggestion ? "border-red-500" : "border-gray-300"}`}
               rows={2}
               value={suggestion}
               onChange={(e) => setSuggestion(e.target.value)}
@@ -508,23 +614,27 @@ const handleDelete = async () => {
           </div>
 
           <div className="flex justify-between">
-  <button
-    onClick={handleDelete}
-    type="button"
-    className="bg-gray-300 text-black px-4 py-2 rounded-md text-sm"
-  >
-    Delete
-  </button>
+            <button
+              onClick={handleDelete}
+              type="button"
+              className="bg-gray-300 text-black px-4 py-2 rounded-md text-sm"
+            >
+              Delete
+            </button>
 
-  <button
-    onClick={handleSave}
-    type="button"
-    className="bg-[#AD343E] text-white px-4 py-2 rounded-md text-sm"
-  >
-    Save
-  </button>
-</div>
+            <button
+              onClick={handleSave}
+              type="button"
+              className="bg-[#AD343E] text-white px-4 py-2 rounded-md text-sm"
+            >
+              Save
+            </button>
+          </div>
         </div>
+        {isLoading && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
+            <span className="text-white text-xl font-semibold animate-pulse">Loading...</span>
+          </div>)}
       </form>
     </>
   );
