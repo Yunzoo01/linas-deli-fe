@@ -128,5 +128,4 @@ export interface Supplier {
   supplierName: string;
   sEmail: string;
   sPhone: string;
-  note: string;
 }
