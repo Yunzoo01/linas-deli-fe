@@ -10,18 +10,21 @@ const charcuterieItems = [
     title: "PETITE",
     serves: "serves 3-4 people",
     image: petiteBox, // import된 이미지 사용
+    price: "$70",
   },
   {
     platter_id: 2,
     title: "MEDIUM",
     serves: "serves 4-5 people",
     image: mediumBox, // import된 이미지 사용
+    price: "$85",
   },
   {
     platter_id: 3,
     title: "LARGE",
     serves: "serves 10-12 people",
     image: largeBox, // import된 이미지 사용
+    price: "$145",
   },
 ];
 
@@ -36,8 +39,8 @@ const Order = () => {
           CHARCUTERIE BOARD
         </h2>
         {/* 설명 */}
-        <p className="text-gray-500 text-sm max-w-md mx-auto mb-6">
-          "We do not accept same-day orders online. Please call us for assistance."
+        <p className="text-gray-500 text-sm lg:text-lg max-w-md mx-auto mb-6">
+          "We do not accept same-day orders online.  <br />  Please call us for assistance."
         </p>
 
         {/* 박스 리스트 */}
@@ -57,9 +60,12 @@ const Order = () => {
               </div>
 
               {/* ✅ 카드 내용 */}
-              <div className="absolute -bottom-4 lg:bottom-0 lg:w-full lg:h-2/5 right-0 bg-white/95 shadow-lg rounded-lg p-4 w-40 text-center flex flex-col items-center justify-center">
+              <div className="absolute -bottom-4 lg:bottom-0 lg:w-full lg:h-1/2 right-0 bg-white/95 shadow-lg rounded-lg p-4 w-40 text-center flex flex-col items-center justify-center">
                 <h3 className="text-sm font-bold lg:text-xl">{item.title} BOX</h3>
                 <p className="text-xs text-gray-500 lg:text-base">{item.serves}</p>
+                <p className="text-sm font-semibold text-[#AD343E] lg:text-lg">
+                  {item.price} <span className="text-xs font-semibold text-gray-500 lg:text-base">+ tax</span>
+                  </p>
                 {/* 주문 버튼 */}
                 <button
                   onClick={() => navigate(`/order/${item.title}`)} // ✅ 주문 버튼 클릭 시 이동

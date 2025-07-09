@@ -84,6 +84,20 @@ const Navbar = () => {
           </li>
           <li>
             <Link
+              to="/gallery"
+              className={`${
+                isHomePage
+                  ? scrolling
+                    ? "text-gray-900 hover:text-gray-700"
+                    : "text-white hover:text-gray-300"
+                  : "text-black hover:text-gray-700"
+              }`}
+            >
+              Gallery
+            </Link>
+          </li>
+          <li>
+            <Link
               to="/contact"
               className={`${
                 isHomePage
@@ -96,6 +110,7 @@ const Navbar = () => {
               Contact
             </Link>
           </li>
+          
         </ul>
       </div>
 
@@ -141,6 +156,15 @@ const Navbar = () => {
               onClick={() => setIsOpen(false)}
             >
               Order
+            </Link>
+          </li>
+          <li>
+            <Link
+              to="/gallery"
+              className="text-gray-900 hover:text-gray-700"
+              onClick={() => setIsOpen(false)}
+            >
+              Gallery
             </Link>
           </li>
           <li>
