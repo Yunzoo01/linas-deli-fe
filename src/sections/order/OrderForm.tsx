@@ -1,13 +1,32 @@
 import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import api from "@/api/axios";
-import { AxiosError } from "axios"; // Import AxiosError
+
+// interface PriceMap {
+//   [key: string]: number;
+// }
 
 const OrderForm = () => {
-  const { boxType } = useParams();
-  const navigate = useNavigate(); // Initialize navigate
-  // console.log(boxType);
+  const { boxType } = useParams<{ boxType: string }>();
+  console.log("boxType from URL:", boxType);
+
+  // // 가격 정의 - 대소문자 구분 없이 처리
+  // const priceMap: PriceMap = {
+  //   "PETITE BOX": 25.00,
+  //   "MEDIUM BOX": 45.00,
+  //   "LARGE BOX": 65.00,
+  //   "petite box": 25.00,
+  //   "medium box": 45.00,
+  //   "large box": 65.00,
+  //   "PETITE": 25.00,
+  //   "MEDIUM": 45.00,
+  //   "LARGE": 65.00
+  // };
+
+  // // 현재 플래터의 가격 계산 - null 체크 추가
+  // const currentPrice = boxType ? (priceMap[boxType] || priceMap[boxType.toUpperCase()] || 0) : 0;
+  // console.log("Current price:", currentPrice, "for boxType:", boxType);
 
   const [formData, setFormData] = useState({
     date: "",
@@ -29,23 +48,21 @@ const OrderForm = () => {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    // Basic validation
+  
     if (!formData.date || !formData.time || !formData.customerName || !formData.phone || !formData.email) {
       toast.error("Please fill in all required fields.");
       return;
     }
-
-    // console.log("📤 Sending formData:", formData);
+  
     try {
-      const response = await api.post("/api/orders", formData);
-      // console.log("Create Success:", response.data);
-      toast.success("Order submitted successfully!");
-      navigate("/order");
+      // Stripe 결제 세션 생성 (주문정보 전체 전송)
+      const paymentResponse = await api.post("/api/payments/create-checkout-session", formData);
+  
+      const url = paymentResponse.data;
+      window.location.href = url;
     } catch (error) {
-      const err = error as AxiosError;
-      console.error("Create Failed:", err.response?.data || err.message);
-      toast.error("Failed to submit order.");
+      console.error("Payment error:", error);
+      toast.error("Failed to process order or payment.");
     }
   };
 
@@ -58,7 +75,7 @@ const OrderForm = () => {
     <div className="max-w-4xl mx-auto">
       <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
         <input type="hidden" name="platter" value={formData.platterName} />
-
+        
         {/* Date | Time */}
         <div>
           <label className="block text-gray-800 font-semibold">Date</label>
@@ -68,7 +85,7 @@ const OrderForm = () => {
             value={formData.date}
             onChange={handleChange}
             className="w-full p-4 border text-gray-800 rounded-4xl border-gray-300 text-lg"
-            min={minDate} // Use the computed minDate here
+            min={minDate}
           />
         </div>
         <div>
@@ -93,7 +110,6 @@ const OrderForm = () => {
             <option value="15:00:00">15:00</option>
             <option value="15:30:00">15:30</option>
             <option value="16:00:00">16:00</option>
-            {/* Times here */}
           </select>
         </div>
 

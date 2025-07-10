@@ -17,6 +17,8 @@ import StaffUpdateMenuForm from "./pages/staff/menu/StaffUpdateMenuForm";
 import { ReactNode } from "react";  // Import ReactNode
 import StaffSuppliers from "./pages/staff/StaffSuppliers";
 import NotFound from "./pages/Notfound";
+import SuccessPage from "./sections/order/SuccessPage";
+import CancelPage from "./sections/order/CancelPage";
 
 // 로그인된 사용자만 접근 가능한 컴포넌트
 const RequireAuth = ({ children }: { children: ReactNode }) => {
@@ -53,6 +55,8 @@ const Layout = () => {
           <Route path="/menu" element={<Menu />} />
           <Route path="/order" element={<Order />} />
           <Route path="/order/:boxType" element={<OrderDetail />} />
+          <Route path="/success" element={<SuccessPage />} />
+          <Route path="/cancel" element={<CancelPage />} />
           <Route path="/contact" element={<Contact />} />
 
           {/* Staff Routes */}

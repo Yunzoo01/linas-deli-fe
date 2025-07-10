@@ -5,7 +5,7 @@ import { Order } from "@/type";
 import api from "@/api/axios";
 import StaffOrderRow from "@/components/staff/order/StaffOrderRow";
 import StaffOrderStatus from "@/components/staff/order/StaffOrderStatus";
-import Pagination from "@/components/Pagination"; // 페이지 네이션 컴포넌트 import
+import Pagination from "@/components/Pagination";
 
 type StatusCountType = {
   status: string;
@@ -78,13 +78,12 @@ const StaffOrderHistory = () => {
   
     fetchOrders();
   }, [currentPage, searchKeyword, selectedStatus]);
-  
 
   function searchByStatus(status: string) {
     setSelectedStatus(status);
     setCurrentPage(1);
-    setSearch("");            // 입력 필드 초기화
-    setSearchKeyword("");     // 검색 키워드 초기화 → 검색 조건 제거
+    setSearch("");
+    setSearchKeyword("");
   }
 
   const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -102,18 +101,36 @@ const StaffOrderHistory = () => {
     setSelectedOrder(updatedOrder);
   };
 
+  // ✅ 수정된 부분: status 매개변수를 받도록 변경
   const updateOrderStatus = async (id: string, newStatus: string) => {
-    if (!["completed", "decline", "complete_decline"].includes(newStatus)) {
-      console.error("Invalid status");
+    console.log(`Updating order ${id} to status: ${newStatus}`); // 디버깅용 로그
+    
+    if (!["completed", "decline", "complete_decline", "in progress"].includes(newStatus)) {
+      console.error("Invalid status:", newStatus);
+      alert(`Invalid status: ${newStatus}`);
       return;
     }
 
     try {
-      await api.put(
+      const response = await api.put(
         `/api/staff/orders/updateStatus/${id}?status=${newStatus}`,
         {}
       );
-      window.location.reload();
+      
+      console.log("Status update response:", response.data); // 디버깅용 로그
+      
+      // 페이지 새로고침 대신 상태만 업데이트 (선택적)
+      // window.location.reload();
+      
+      // 또는 특정 주문만 업데이트
+      setOrders(prevOrders => 
+        prevOrders.map(order => 
+          order.oid.toString() === id 
+            ? { ...order, status: newStatus }
+            : order
+        )
+      );
+      
     } catch (error) {
       console.error("Error updating order status:", error);
       alert("Failed to update order status.");
@@ -128,7 +145,13 @@ const StaffOrderHistory = () => {
           <div className="flex flex-col lg:flex-row justify-between items-center md:items-end mb-6">
             <div className="flex mb-2 gap-4">
               {statuses.map((item, index) => (
-                <StaffOrderStatus item={item} index={index} selectedStatus={selectedStatus} searchByStatus={searchByStatus}/>
+                <StaffOrderStatus 
+                  key={index}
+                  item={item} 
+                  index={index} 
+                  selectedStatus={selectedStatus} 
+                  searchByStatus={searchByStatus}
+                />
               ))}
             </div>
 
@@ -144,6 +167,7 @@ const StaffOrderHistory = () => {
 
           {loading && <div>Loading...</div>}
           {error && <div>{error}</div>}
+          
           <div className="hidden md:flex w-full border-[#525252] flex border-t border-b my-3 font-bold text-base py-2">
             <div className="w-[20%] text-center">Order No.</div>
             <div className="w-[20%] text-center">E-mail</div>
@@ -156,13 +180,14 @@ const StaffOrderHistory = () => {
             {orders.length > 0 ? (
               orders.map((order) => (
                 <StaffOrderRow 
-                  key={order.oid}  // key prop 추가
+                  key={order.oid}
                   order={order} 
                   setIsOpen={setIsOpen} 
                   setSelectedOrder={setSelectedOrder} 
                   formatTime24To12={formatTime24To12} 
                   formatDate={formatDate}
-                  updateOrderStatus={() => updateOrderStatus(order.oid.toString(), "completed")}
+                  // ✅ 수정된 부분: updateOrderStatus 함수 자체를 전달
+                  updateOrderStatus={updateOrderStatus}
                 />
               ))
             ) : (

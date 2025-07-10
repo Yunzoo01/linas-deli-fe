@@ -78,7 +78,8 @@ const Menu = () => {
                 key={item.pid} 
                 item={item} 
                 handleOpen={handleOpen} 
-                delay={index * 0.1}
+                index={index}
+                // delay={index * 0.1}
               />
             ))}
           </div>

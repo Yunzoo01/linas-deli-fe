@@ -43,10 +43,10 @@ const StaffAddMenuForm = () => {
   const [lactoseFreeChecked, setLactoseFreeChecked] = useState(false);
 
   const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
-  const [productImageFile, setProductImageFile] = useState<File | null>(null);
+  // const [productImageFile, setProductImageFile] = useState<File | null>(null);
 
   const [previewIngredientsImageUrl, setPreviewIngredientsImageUrl] = useState<string | null>(null);
-  const [ingredientsImageFile, setIngredientsImageFile] = useState<File | null>(null);
+  const [_ingredientsImageFile, setIngredientsImageFile] = useState<File | null>(null);
 
   const [description, setDescription] = useState("");
   const [suggestion, setSuggestion] = useState("");
