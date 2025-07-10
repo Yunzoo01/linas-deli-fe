@@ -17,6 +17,7 @@ import StaffUpdateMenuForm from "./pages/staff/menu/StaffUpdateMenuForm";
 import { ReactNode } from "react";  // Import ReactNode
 import StaffSuppliers from "./pages/staff/StaffSuppliers";
 import NotFound from "./pages/Notfound";
+import Gallery from "./pages/OrderGarllery";
 import SuccessPage from "./sections/order/SuccessPage";
 import CancelPage from "./sections/order/CancelPage";
 
@@ -55,6 +56,7 @@ const Layout = () => {
           <Route path="/menu" element={<Menu />} />
           <Route path="/order" element={<Order />} />
           <Route path="/order/:boxType" element={<OrderDetail />} />
+          <Route path="/gallery" element={<Gallery />} />
           <Route path="/success" element={<SuccessPage />} />
           <Route path="/cancel" element={<CancelPage />} />
           <Route path="/contact" element={<Contact />} />

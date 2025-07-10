@@ -207,9 +207,15 @@ const StaffUpdateMenuForm = () => {
     form.append("supplierPrice", supplierPrice);
     form.append("salePrice", salePrice);
     form.append("plu", plu);
-    form.append("animalId", String(selectedAnimalId!));
-    form.append("pasteurized", String(pasteurized));
-    form.append("originId", String(selectedCountryId!));
+    if (!isOther) {
+      if (selectedAnimalId !== null) {
+        form.append("animalId", String(selectedAnimalId));
+      }
+      if (selectedCountryId !== null) {
+        form.append("originId", String(selectedCountryId));
+      }
+      form.append("pasteurized", String(pasteurized));
+    }
     form.append("description", description);
     form.append("suggestion", suggestion);
 

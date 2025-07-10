@@ -78,12 +78,12 @@ const MenuModal = ({ isOpen, onClose, menuItem }: Props) => {
                 <div className="flex-1 space-y-4">
                   <div>
                     <h3 className="text-sm font-semibold text-gray-500 uppercase mb-1 underline">Description</h3>
-                    <p className="text-gray-800">{menuItem.description}</p>
+                    <p className="text-gray-800 whitespace-pre-line">{menuItem.description}</p>
                   </div>
 
                   <div>
                     <h3 className="text-sm font-semibold text-gray-500 uppercase mb-1 underline">Serving Suggestion</h3>
-                    <p className="text-gray-700">{menuItem.servingSuggestion}</p>
+                    <p className="text-gray-700 whitespace-pre-line">{menuItem.servingSuggestion}</p>
                   </div>
 
                   {/* ✅ Others 제외한 경우에만 Details 출력 */}
