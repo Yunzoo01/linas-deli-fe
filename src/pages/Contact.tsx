@@ -84,7 +84,7 @@ const Contact = () => {
 
               <div className="flex items-center gap-3 lg:gap-5">
                 <FaEnvelope className="text-gray-600 text-xl" />
-                <p className="text-gray-700"><span className="hidden lg:block">E-mail</span> demo@gmail.com</p>
+                <p className="text-gray-700"><span className="hidden lg:block">E-mail</span> linasdeli.info@gmail.com</p>
               </div>
 
               <div className="border-t border-gray-300 my-4 hidden lg:block"></div>

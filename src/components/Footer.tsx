@@ -32,13 +32,13 @@ const Footer = () => {
           {/* 이메일 */}
           <div className="flex items-center space-x-2 sm:space-x-6">
             <img src="/Icon/Mail outline.svg" alt="Mail Icon" className="w-4 h-4 sm:w-7 sm:h-7 sm:filter sm:invert sm:brightness-0 sm:contrast-100" />
-            <p className="text-[#A7A7A7] text-sm sm:text-white text-sm font-normal sm:text-xl">linasdeli@gmail.com</p>
+            <p className="text-[#A7A7A7] text-sm sm:text-white text-sm font-normal sm:text-xl">linasdeli.info@gmail.com</p>
           </div>
 
           {/* 전화번호 */}
           <div className="flex items-center space-x-2 sm:space-x-6">
             <img src="/Icon/Icon_call.svg" alt="Call Icon" className="w-4 h-4 sm:w-7 sm:h-7 sm:filter sm:invert sm:brightness-0 sm:contrast-100" />
-            <p className="text-[#A7A7A7] sm:text-white text-sm font-normal sm:text-xl">123-456-2355</p>
+            <p className="text-[#A7A7A7] sm:text-white text-sm font-normal sm:text-xl">+1 (604)-688-8881</p>
           </div>
         </div>
       </div>
