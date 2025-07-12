@@ -19,7 +19,7 @@ const OrderSection = () => {
                 </button>
                 {/* 제목 & 부제목 중앙 정렬 */}
                 <div className="flex flex-col items-center text-center">
-                    <h2 className="text-xl font-semibold lg:text-4xl">Make a order</h2>
+                    <h2 className="text-xl font-semibold lg:text-4xl">Place an order</h2>
                     <p className="text-gray-500 text-xs lg:text-base mt-4">CHARCUTERIE BOARD</p>
                 </div>
             </div>
