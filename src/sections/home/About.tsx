@@ -22,7 +22,7 @@ const About = () => {
                         </p>
                         <p className="flex text-xs lg:text-base items-center gap-2 text-gray-600">
                             <img src="/Icon/Outline/mail.svg" alt="Email" className="w-5 h-5 lg:w-8 lg:h-8" />
-                            linasdeli@gmail.com
+                            linasdeli.info@gmail.com
                         </p>
                         <p className="flex text-xs lg:text-base items-start gap-2 text-gray-600">
                             <img src="/Icon/Outline/location-marker.svg" alt="Location" className="w-5 h-5 lg:w-8 lg:h-8 flex-shrink-0 mt-1" />
