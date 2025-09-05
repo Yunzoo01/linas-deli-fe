@@ -31,7 +31,7 @@ const Home = () => {
     } else {
       setIsModalOpen(false);
     }
-  };
+  };a
 
   return (
     <div>

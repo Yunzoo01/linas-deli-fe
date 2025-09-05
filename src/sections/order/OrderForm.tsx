@@ -11,6 +11,7 @@ const OrderForm = () => {
   const { boxType } = useParams<{ boxType: string }>();
   console.log("boxType from URL:", boxType);
 
+  
   // // 가격 정의 - 대소문자 구분 없이 처리
   // const priceMap: PriceMap = {
   //   "PETITE BOX": 25.00,
@@ -43,6 +44,20 @@ const OrderForm = () => {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
+    
+    // 날짜 입력 시 iOS Safari 대응 검증 (조용하게)
+    if (name === 'date') {
+      const selectedDate = new Date(value);
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      tomorrow.setHours(0, 0, 0, 0); // 시간 초기화
+      
+      if (selectedDate < tomorrow) {
+        // 알림 없이 그냥 리턴 (상태 업데이트 안함)
+        return;
+      }
+    }
+    
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -51,6 +66,17 @@ const OrderForm = () => {
   
     if (!formData.date || !formData.time || !formData.customerName || !formData.phone || !formData.email) {
       toast.error("Please fill in all required fields.");
+      return;
+    }
+
+    // iOS Safari 대응 - submit 시에도 날짜 재검증
+    const selectedDate = new Date(formData.date);
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(0, 0, 0, 0);
+    
+    if (selectedDate < tomorrow) {
+      toast.error("Please select tomorrow or later date.");
       return;
     }
   
@@ -87,6 +113,9 @@ const OrderForm = () => {
             className="w-full p-4 border text-gray-800 rounded-4xl border-gray-300 text-lg"
             min={minDate}
           />
+          <p className="text-sm text-gray-500 mt-1">
+            📅 Available from tomorrow onwards
+          </p>
         </div>
         <div>
           <label className="block font-semibold text-gray-800">Time</label>
