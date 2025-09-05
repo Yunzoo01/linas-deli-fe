@@ -39,10 +39,23 @@ const StaffOrderHistory = () => {
     return `${formattedHour}:${formattedMinute} ${period}`;
   }
 
+  // ✅ 수정된 formatDate 함수 - 시간대 버그 보정 (단순 문자열 처리)
   function formatDate(dateString: string) {
-    const date = new Date(dateString);
-    const options: Intl.DateTimeFormatOptions = { month: "short", day: "numeric" };
-    return date.toLocaleDateString("en-US", options);
+    console.log("🔍 formatDate 입력값:", dateString); // 디버깅용
+    
+    if (!dateString) return "";
+    
+    // ✅ 시간대 버그 보정: 단순하게 day에 +1
+    const [, month, day] = dateString.split('-');
+    const correctedDay = parseInt(day) + 1; // 하루 더해서 원래 날짜로 복원
+    
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                       "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    
+    const result = `${monthNames[parseInt(month) - 1]} ${correctedDay}`;
+    console.log("🔍 formatDate 결과 (보정됨):", result); // 디버깅용
+    
+    return result;
   }
 
   useEffect(() => {
@@ -64,6 +77,19 @@ const StaffOrderHistory = () => {
   
         const queryString = new URLSearchParams(params).toString();
         const response = await api.get(`/api/staff/orders?${queryString}`);
+  
+        // ✅ 디버깅: 서버에서 받은 실제 데이터 확인
+        console.log("🔍 API Response Orders:", response.data.orderList.content);
+        
+        // ✅ 주문 #14의 실제 데이터 확인
+        const order14 = response.data.orderList.content.find((order: Order) => order.oid === 14);
+        if (order14) {
+          console.log("🔍 Order #14 실제 데이터:", {
+            oid: order14.oid,
+            date: order14.date,
+            time: order14.time
+          });
+        }
   
         setOrders(response.data.orderList.content);
         setTotalPages(response.data.orderList.totalPages);

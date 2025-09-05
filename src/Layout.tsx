@@ -20,6 +20,7 @@ import NotFound from "./pages/Notfound";
 import Gallery from "./pages/OrderGarllery";
 import SuccessPage from "./sections/order/SuccessPage";
 import CancelPage from "./sections/order/CancelPage";
+import DonationSuccess from "./sections/order/DomationSuccess";
 
 // 로그인된 사용자만 접근 가능한 컴포넌트
 const RequireAuth = ({ children }: { children: ReactNode }) => {
@@ -60,7 +61,7 @@ const Layout = () => {
           <Route path="/success" element={<SuccessPage />} />
           <Route path="/cancel" element={<CancelPage />} />
           <Route path="/contact" element={<Contact />} />
-
+          <Route path="/donation-success" element={<DonationSuccess />} />
           {/* Staff Routes */}
           <Route path="/staff/login" element={<StaffLogin />} />
           <Route path="/staff/menu" element={<RequireAuth><StaffMenu /></RequireAuth>} />
